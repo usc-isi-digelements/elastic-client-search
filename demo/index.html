@@ -1,0 +1,37 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>elastic-search Demo</title>
+    <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="import" href="../../elastic-client/elastic-client.html">
+    <link rel="import" href="../elastic-client-search.html">
+  </head>
+  <body unresolved>
+    <template is="dom-bind">
+      <elastic-client 
+        config='{"host": "http://localhost:9200"}'
+        client="{{esclient}}"
+        cluster-status="{{my-status}}">
+      </elastic-client>
+
+      <elastic-client-search 
+        client="[[esclient]]"
+        index="mockads"
+        indexType: ['ad']
+        body='{"query": {"match_all": {}}}'
+        results="{{data}}"
+        lastError="{{error}}">
+      </elastic-client-search>
+
+      <span>hits: {{data.hits.total}}</span>
+      <template is="dom-repeat" items={{data.hits.hits}} 
+        as=item>
+        <p>{{item._source.title}}</p>
+      </template>
+
+    </template>
+  </body>
+</html>

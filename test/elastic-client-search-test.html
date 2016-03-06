@@ -1,0 +1,92 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+    <script src="../../elasticsearch/elasticsearch.js"></script>
+    <script src="../../elastic.js/dist/elastic.js"></script>
+
+    <!-- Import the element to test -->
+    <link rel="import" href="../elastic-client-search.html">
+  </head>
+  <body>
+
+    <!-- Use the document as a place to set up your fixtures. -->
+    <test-fixture id="elastic-client-search-fixture">
+      <template>
+        <elastic-client-search index="mockads" index-type='["ad"]' results="{{data}}">
+        </elastic-client-search>
+      </template>
+    </test-fixture>
+    <test-fixture id="bad-index">
+      <template>
+        <elastic-client-search index="nothing-here" results="{{data}}">
+        </elastic-client-search>
+      </template>
+    </test-fixture>
+    <script>
+      suite('<elastic-client-search>', function() {
+
+        var es;
+        var esBad;
+        var client;
+        var body;
+
+        setup(function() {
+          esBad = fixture('bad-index');
+          es = fixture('elastic-client-search-fixture');
+          client = new elasticsearch.Client({host: 'http://localhost:9200'});
+          es.client = client;
+          esBad.client = client;
+          body = ejs.Request().query(ejs.MatchAllQuery());
+        });
+
+        test('defines the index property', function () {
+          assert.equal(es.index, 'mockads');
+        });
+
+        test('defines the elastic-type property', function() {
+          assert.deepEqual(es.indexType, ['ad']);
+        });
+
+        test('submits body', function (done) {
+            es.addEventListener('results-changed', function (event) {
+              expect(es.results).to.be.an('object');
+              expect(es.results).to.not.be.empty;
+              expect(es.results).to.include.keys('hits');
+              expect(es.lastError).to.not.exist;
+              assert.equal(es.results.hits.hits[0]._type, 'ad');
+              done();
+            });
+            es.body = body;
+        });
+
+        // test('build and submit query', function (done) {
+        //     es.addEventListener('results-changed', function (event) {
+        //       expect(es.results).to.be.an('object');
+        //       expect(es.results).to.not.be.empty;
+        //       expect(es.results).to.include.keys('hits');
+        //       expect(es.lastError).to.not.exist;
+        //       assert.equal(es.results.hits.hits[0]._type, 'ad');
+        //       done();
+        //     });
+        //     var query = ejs.MatchQuery('title', 'ahab');
+        //     es.query = query;          
+        // });
+
+        test('when a search fails', function (done) {
+            esBad.addEventListener('last-error-changed', function (event) {
+              expect(esBad.lastError).to.exist;
+              done();
+            });
+            esBad.body = body;
+        });
+      });
+    </script>
+
+  </body>
+</html>
