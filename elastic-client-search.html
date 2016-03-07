@@ -104,6 +104,7 @@
        */
       page: {
         type: Number,
+        value: 1,
         notify: true
       },
 
@@ -113,6 +114,7 @@
        */
       pageSize: {
         type: Number,
+        value: 25,
         notify: true
       },
 
@@ -122,6 +124,7 @@
        */
       pageCount: {
         type: Number,
+        value: 1,
         notify: true
       },
 
@@ -236,10 +239,10 @@
       var request = ejs.Request();
 
       if (this.query) {
-        request.MatchQuery(this.query);
+        request.query(this.query);
       }
       else {
-        request.MatchAllQuery();
+        request.query(ejs.MatchAllQuery());
       }
 
       // TODO: add logic to build entire request from properties.

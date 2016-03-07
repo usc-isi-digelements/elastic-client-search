@@ -65,18 +65,19 @@
             es.body = body;
         });
 
-        // test('build and submit query', function (done) {
-        //     es.addEventListener('results-changed', function (event) {
-        //       expect(es.results).to.be.an('object');
-        //       expect(es.results).to.not.be.empty;
-        //       expect(es.results).to.include.keys('hits');
-        //       expect(es.lastError).to.not.exist;
-        //       assert.equal(es.results.hits.hits[0]._type, 'ad');
-        //       done();
-        //     });
-        //     var query = ejs.MatchQuery('title', 'ahab');
-        //     es.query = query;          
-        // });
+        test('build and submit query', function (done) {
+            es.addEventListener('results-changed', function (event) {
+              expect(es.results).to.be.an('object');
+              expect(es.results).to.not.be.empty;
+              expect(es.results).to.include.keys('hits');
+              expect(es.lastError).to.not.exist;
+              assert.equal(es.results.hits.hits[0]._type, 'ad');
+              done();
+            });
+
+            es.query = ejs.MatchQuery('title', 'ahab');
+            es.search();       
+        });
 
         test('when a search fails', function (done) {
             esBad.addEventListener('last-error-changed', function (event) {
