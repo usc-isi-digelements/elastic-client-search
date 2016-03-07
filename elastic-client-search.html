@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="./elasticjs.html">
+<link rel="import" href="./lodash.html">
 
 <!--
 
@@ -132,6 +133,13 @@
        * TODO: add comment
        *
        */
+
+      /**
+       * TODO: see https://github.com/YousefED/ElasticUI/src/util/FilterTool.ts
+       * and https://github.com/YousefED/ElasticUI/src/util/FilterCollection.ts
+       * and 
+       * -- probably lodash has some useful functions to manage the filters collection.  
+       */
       filters: {
         type: Array,
         notify: true
@@ -246,7 +254,7 @@
       }
 
       // TODO: add logic to build entire request from properties.
-      // see: https://github.com/YousefED/ElasticUI/blob/d584bf89ad084bff736e5037d6372a205cc2975d/src/controllers/IndexController.ts
+      // see: https://github.com/YousefED/ElasticUI/src/controllers/IndexController.ts
       // for general idea
       return request;
     },

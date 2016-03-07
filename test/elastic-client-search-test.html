@@ -72,11 +72,18 @@
               expect(es.results).to.include.keys('hits');
               expect(es.lastError).to.not.exist;
               assert.equal(es.results.hits.hits[0]._type, 'ad');
+              assert.equal(es.results.hits.hits.length, 25);
+              expect(es.results.hits.total).to.be.at.least(30);
+              expect(es.results.hits.hits[0]._source.title.toLowerCase()).to.contain('ahab');
               done();
             });
 
             es.query = ejs.MatchQuery('title', 'ahab');
             es.search();       
+        });
+
+        test('query not set', function(done) {
+          done();
         });
 
         test('when a search fails', function (done) {
