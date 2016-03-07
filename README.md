@@ -9,13 +9,8 @@ This suite of web components is inspired by the angular project ElasticUI:  Many
 
 ## Dependencies
 
-Element dependencies are managed via [Bower](http://bower.io/). You can
-install that via:
+* Elasticsearch server instance
+* mockads index (run data/import_test_data.sh after installing and starting elastic search) 
 
-    npm install -g bower
-
-Then, go ahead and download the element's dependencies:
-
-    bower install
 
 
