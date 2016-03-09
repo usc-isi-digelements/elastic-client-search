@@ -4,270 +4,297 @@
 
 <!--
 
-    Element which provides a view of an Elasticsearch index, and coordinates 
-    building and issuing queries using the elastic.js library.  Satellite 
-    elements for query, filters, aggregation, sorting, and paging communicate 
-    with this element to make changes to the index object, and to receive 
-    results from queries that are issued to an elastic server instance.  
+        Element which provides a view of an Elasticsearch index, and coordinates
+        building and issuing queries using the elastic.js library.  Satellite
+        elements for query, filters, aggregation, sorting, and paging communicate
+        with this element to make changes to the index object, and to receive
+        results from queries that are issued to an elastic server instance.
 
-    If given a body object as input, this element makes AJAX request to 
-    elasticsearch REST API.
+        If given a body object as input, this element makes AJAX request to
+        elasticsearch REST API.
 
-    Example:
+        Example:
 
-    <elastic-client 
-      config='{"host": "http://localhost:9200"}'
-      client="{{esclient}}"
-      cluster-status="{{my-status}}">
-    </elastic-client>
+        <elastic-client
+            config='{"host": "http://localhost:9200"}'
+            client="{{esclient}}"
+            cluster-status="{{my-status}}">
+        </elastic-client>
 
-    <elastic-search 
-      client="[[esclient]]"
-      index="ads"
-      index-type='["offer", "seller"]'
-      body='{"query": {"match_all": {}}}'
-      results="{{data}}"
-      lastError="{{error}}">
-    </elastic-search>
+        <elastic-search
+            client="[[esclient]]"
+            index="ads"
+            index-type='["offer", "seller"]'
+            body='{"query": {"match_all": {}}}'
+            results="{{data}}"
+            lastError="{{error}}">
+        </elastic-search>
 
 @demo demo/index.html
 
 -->
 <script>
-  Polymer({
-    is: 'elastic-client-search',
+    Polymer({
+        is: 'elastic-client-search',
 
-    properties: {
-      /**
-       * an instance of elasticsearch.Client which is connected to 
-       * an elasticsearch server
-       */
-      client: {
-        type: Object
-      },
+        properties: {
+            /**
+             * an instance of elasticsearch.Client which is connected to
+             * an elasticsearch server
+             */
+            client: {
+                type: Object
+            },
 
-      /**
-       * the elastic index (database name)
-       */
-      index: {
-        type: String
-      },
+            /**
+             * the elastic index (database name)
+             */
+            index: {
+                type: String
+            },
 
-      /**
-       * the elastic type (optional -- leave empty for all types)
-       */
-      indexType: {
-        type: Array,
-        value: []
-      },
+            /**
+             * the elastic type (optional -- leave empty for all types)
+             */
+            type: {
+                type: Array,
+                value: []
+            },
 
-      /**
-       * a fully specified elastic query.  Use this if you do not want 
-       * the query body to be built by this element.
-       * (see https://www.elastic.co for search API)
-       * 
-       * I body is non-null, then the basicSearch observer will be invoked.
-       * 
-       */
-      body: {
-        type: Object,
-        notify: true
-      },
+            availableTypes: {
+                type: Array,
+                readOnly: true,
+                notify: true
+            },
 
-      /**
-       * The elasticsearch query that should be invoked.
-       *
-       */
-      query: {
-        type: Object,
-        value: null,
-        notify: true
-      },
+            /**
+             * a fully specified elastic query.  Use this if you do not want
+             * the query body to be built by this element.
+             * (see https://www.elastic.co for search API)
+             *
+             * I body is non-null, then the basicSearch observer will be invoked.
+             *
+             */
+            body: {
+                type: Object,
+                notify: true
+            },
 
-      /**
-       * TODO: add comment
-       *
-       */
-      size: {
-        type: Number,
-        notify: true
-      },
+            /**
+             * The elasticsearch query that should be invoked.
+             *
+             */
+            query: {
+                type: Object,
+                value: null,
+                notify: true
+            },
 
-      /**
-       * TODO: add comment
-       *
-       */
-      sort: Object,
+            /**
+             * TODO: add comment
+             *
+             */
+             //This is redundant from pageSize
+            // size: {
+            //   type: Number,
+            //   notify: true
+            // },
 
-      /**
-       * TODO: add comment
-       *
-       */
-      page: {
-        type: Number,
-        value: 1,
-        notify: true
-      },
+            /**
+             * TODO: add comment
+             *
+             */
+            sort: Object,
 
-      /**
-       * TODO: add comment
-       *
-       */
-      pageSize: {
-        type: Number,
-        value: 25,
-        notify: true
-      },
+            /**
+             * TODO: add comment
+             *
+             */
+            page: {
+                type: Number,
+                value: 1,
+                notify: true
+            },
 
-      /**
-       * TODO: add comment
-       *
-       */
-      pageCount: {
-        type: Number,
-        value: 1,
-        notify: true
-      },
+            /**
+             * TODO: add comment
+             *
+             */
+            pageSize: {
+                type: Number,
+                value: 25,
+                notify: true
+            },
 
-      /**
-       * TODO: add comment
-       *
-       */
+            /**
+             * TODO: add comment
+             *
+             */
+            pageCount: {
+                type: Number,
+                value: 1,
+                notify: true
+            },
 
-      /**
-       * TODO: see https://github.com/YousefED/ElasticUI/src/util/FilterTool.ts
-       * and https://github.com/YousefED/ElasticUI/src/util/FilterCollection.ts
-       * and 
-       * -- probably lodash has some useful functions to manage the filters collection.  
-       */
-      filters: {
-        type: Array,
-        notify: true
-      },
+            /**
+             * TODO: add comment
+             *
+             */
+            /**
+             * TODO: see https://github.com/YousefED/ElasticUI/src/util/FilterTool.ts
+             * and https://github.com/YousefED/ElasticUI/src/util/FilterCollection.ts
+             * and
+             * -- probably lodash has some useful functions to manage the filters collection.
+             */
+            filters: {
+                type: Array,
+                notify: true
+            },
 
-      /**
-       * TODO: add comment
-       *
-       */
-      aggregations: {
-        type: Array,
-        notify: true
-      },
+            /**
+             * TODO: add comment
+             *
+             */
+            aggregations: {
+                type: Array,
+                notify: true
+            },
 
-      /**
-       * TODO: add comment
-       *
-       */
-      hightlight: {
-        type: Object,
-        notify: true
-      },
+            /**
+             * TODO: add comment
+             *
+             */
+            hightlight: {
+                type: Object,
+                notify: true
+            },
 
-      /**
-       * TODO: add comment
-       *
-       */
-      autoLoad: {
-        type: Boolean,
-        value: false,
-        notify: true
-      },
+            /**
+             * TODO: add comment
+             *
+             */
+            autoLoad: {
+                type: Boolean,
+                value: false,
+                notify: true
+            },
 
-      /**
-       * elastic search JSON results available after a successful query.
-       *
-       */
-      results: {
-        type: Object,
-        notify: true,
-        readOnly: true
-      },
+            /**
+             * elastic search JSON results available after a successful query.
+             *
+             */
+            results: {
+                type: Object,
+                notify: true,
+                readOnly: true
+            },
 
-      /**
-       * either null or an error object that was returned from elastic search server. 
-       */
-      lastError: {
-        type: Object,
-        notify: true,
-        readOnly: true
-      }
-    },
+            /**
+             * either null or an error object that was returned from elastic search server.
+             */
+            lastError: {
+                type: Object,
+                notify: true,
+                readOnly: true
+            }
+        },
 
-    observers: [
-      'basicSearch(body, index, client)'
-    ],
+        observers: [
+            'basicSearch(body, index, client)',
+            'fetchTypes(index, client)'
+        ],
 
-    // ready: function() {
-    //   if (this.autoLoad) {
-    //     this.search();
-    //   }
-    // },
+        // ready: function() {
+        //   if (this.autoLoad) {
+        //     this.search();
+        //   }
+        // },
 
 
-    /**
-     * Performs a server request via the elasticsearch client; invoked whenevery this.query is changed.
-     * 
-     * @return {ElasticSearchResults}
-     */
-    basicSearch: function() {
-      if (!this.body) {
-        return;
-      }
+        /**
+         * Performs a server request via the elasticsearch client; invoked whenevery this.query is changed.
+         *
+         * @return {ElasticSearchResults}
+         */
+        basicSearch: function() {
+            if(!this.body) {
+                return;
+            }
 
-      var self = this;
+            var me = this;
 
-      this.client.search({
-        index: this.index,
-        type: this.indexType,
-        body: this.body
-      })
-      .then(function(results) {
-        self._setResults(results);
-        self._setLastError(null);
-      })
-      .catch(function(err) {
-        self._setLastError(err);
-      });        
-    },
+            this.client.search({
+                index: this.index,
+                type: this.indexType,
+                body: this.body
+            })
+            .then(function(results) {
+                me._setResults(results);
+                me._setLastError(null);
+            })
+            .catch(function(err) {
+                me._setLastError(err);
+            });
+        },
 
-    search: function() {
-      var self = this;
+        search: function() {
+            var me = this;
 
-      this._getSearchPromise()
-      .then(function(results) {
-        self._setResults(results);
-        self._setLastError(null);        
-      })
-      .catch(function(err) {
-        self._setLastError(err);
-      });
-    },
+            this.getSearchPromise()
+            .then(function(results) {
+                me._setResults(results);
+                me._setLastError(null);
+            })
+            .catch(function(err) {
+                me._setLastError(err);
+            });
+        },
 
-    _buildRequest: function() {
-      var request = ejs.Request();
+        buildRequest: function() {
+            var request = ejs.Request();
 
-      if (this.query) {
-        request.query(this.query);
-      }
-      else {
-        request.query(ejs.MatchAllQuery());
-      }
+            if (this.query) {
+                request.query(this.query);
+            } else {
+                request.query(ejs.MatchAllQuery());
+            }
 
-      // TODO: add logic to build entire request from properties.
-      // see: https://github.com/YousefED/ElasticUI/src/controllers/IndexController.ts
-      // for general idea
-      return request;
-    },
+            // TODO: add logic to build entire request from properties.
+            // see: https://github.com/YousefED/ElasticUI/src/controllers/IndexController.ts
+            // for general idea
+            return request;
+        },
 
-    _getSearchPromise: function() {
-      var request = this._buildRequest();
-      return this.client.search({
-        index: this.index,
-        type: this.indexType,
-        size: this.pageSize,
-        from: this.pageSize * (this.page - 1),
-        body: request
-      });
-    }
-  });
+        getSearchPromise: function() {
+            var request = this.buildRequest();
+            return this.client.search({
+                index: this.index,
+                type: this.indexType,
+                size: this.pageSize,
+                from: this.pageSize * (this.page - 1),
+                body: request
+            });
+        },
+
+        fetchTypes: function() {
+            var me = this;
+
+            me.client.indices.getMapping({
+                index: me.index
+            })
+            .then(function(mapping) {
+                var types = [];
+                _.each(mapping[me.index].mappings, function(typeMapping, type) {
+                    if(type !== '_default_') {
+                        types.push(type);
+                    }
+                })
+                me._setAvailableTypes(types);
+                return;
+            })
+            .catch(function(err) {
+                me._setLastError(err);
+            });
+        }
+    });
 </script>

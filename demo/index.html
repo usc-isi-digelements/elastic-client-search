@@ -11,25 +11,32 @@
   </head>
   <body unresolved>
     <template is="dom-bind">
-      <elastic-client 
+      <elastic-client
         config='{"host": "http://localhost:9200"}'
         client="{{esclient}}"
         cluster-status="{{my-status}}">
       </elastic-client>
 
-      <elastic-client-search 
+      <elastic-client-search
         client="[[esclient]]"
         index="mockads"
-        indexType: ['ad']
+        type='["ad"]'
         body='{"query": {"match_all": {}}}'
         results="{{data}}"
-        lastError="{{error}}">
+        lastError="{{error}}"
+        available-types="{{types}}">
       </elastic-client-search>
 
+      <span>Types: {{types.length}}</span>
+      <template is="dom-repeat" items={{types}} as=type>
+          <p>{{type}}</p>
+      </template>
+      <br>
+
       <span>hits: {{data.hits.total}}</span>
-      <template is="dom-repeat" items={{data.hits.hits}} 
-        as=item>
-        <p>{{item._source.title}}</p>
+      <template is="dom-repeat" items={{data.hits.hits}} as=item>
+          <p>{{item._source.title}}</p>
+        </div>
       </template>
 
     </template>
