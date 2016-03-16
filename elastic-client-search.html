@@ -61,12 +61,6 @@
                 value: []
             },
 
-            availableTypes: {
-                type: Array,
-                readOnly: true,
-                notify: true
-            },
-
             /**
              * a fully specified elastic query.  Use this if you do not want
              * the query body to be built by this element.
@@ -81,12 +75,11 @@
             },
 
             /**
-             * The elasticsearch query that should be invoked.
-             *
+             * The elasticsearch query that should be invoked. If this is not set
+             * the resulting elasticsearch query is "match_all"
              */
             query: {
                 type: Object,
-                value: null,
                 notify: true
             },
 
@@ -186,7 +179,15 @@
             results: {
                 type: Object,
                 notify: true,
-                readOnly: true
+                readOnly: true,
+                value: null
+            },
+
+            resultCount: {
+                type: Number,
+                readOnly: true,
+                notify: true,
+                computed: 'resolveResultCount(results)'
             },
 
             /**
@@ -201,7 +202,7 @@
 
         observers: [
             'basicSearch(body, index, client)',
-            'fetchTypes(index, client)'
+            'search(client, index, query)'
         ],
 
         // ready: function() {
@@ -276,25 +277,14 @@
             });
         },
 
-        fetchTypes: function() {
-            var me = this;
-
-            me.client.indices.getMapping({
-                index: me.index
-            })
-            .then(function(mapping) {
-                var types = [];
-                _.each(mapping[me.index].mappings, function(typeMapping, type) {
-                    if(type !== '_default_') {
-                        types.push(type);
-                    }
-                })
-                me._setAvailableTypes(types);
-                return;
-            })
-            .catch(function(err) {
-                me._setLastError(err);
-            });
+        resolveResultCount: function(results) {
+            if(results && results.hits && results.hits.total !== undefined) {
+                return results.hits.total
+            } else if(results && results.hits && results.hits.hits) {
+                return results.hits.hits
+            } else {
+                return 0;
+            }
         }
     });
 </script>
