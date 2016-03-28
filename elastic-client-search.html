@@ -133,15 +133,10 @@
              * TODO: add comment
              *
              */
-            /**
-             * TODO: see https://github.com/YousefED/ElasticUI/src/util/FilterTool.ts
-             * and https://github.com/YousefED/ElasticUI/src/util/FilterCollection.ts
-             * and
-             * -- probably lodash has some useful functions to manage the filters collection.
-             */
             filters: {
                 type: Array,
-                notify: true
+                notify: true,
+                value: []
             },
 
             /**
@@ -150,7 +145,8 @@
              */
             aggregations: {
                 type: Array,
-                notify: true
+                notify: true,
+                value: []
             },
 
             /**
@@ -202,7 +198,7 @@
 
         observers: [
             'basicSearch(body, index, client)',
-            'search(client, index, query)'
+            'search(client, index, query, filters, aggregations)'
         ],
 
         // ready: function() {
@@ -260,6 +256,15 @@
                 request.query(ejs.MatchAllQuery());
             }
 
+            _.each(this.aggregations, function(agg) {
+                request.agg(agg);
+            });
+
+            if(this.filters && this.filters.length > 0) {
+                request.filter(ejs.AndFilter(this.filters[0]));
+            }
+
+            console.log(request.toJSON());
             // TODO: add logic to build entire request from properties.
             // see: https://github.com/YousefED/ElasticUI/src/controllers/IndexController.ts
             // for general idea
