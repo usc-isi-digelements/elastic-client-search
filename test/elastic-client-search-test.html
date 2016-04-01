@@ -18,7 +18,7 @@
     <!-- Use the document as a place to set up your fixtures. -->
     <test-fixture id="elastic-client-search-fixture">
       <template>
-        <elastic-client-search index="mockads" index-type='["ad"]' results="{{data}}">
+        <elastic-client-search index="mockads" type='["ad"]' results="{{data}}">
         </elastic-client-search>
       </template>
     </test-fixture>
@@ -50,7 +50,7 @@
         });
 
         test('defines the elastic-type property', function() {
-          assert.deepEqual(es.indexType, ['ad']);
+          assert.deepEqual(es.type, ['ad']);
         });
 
         test('submits body', function (done) {
@@ -79,7 +79,7 @@
             });
 
             es.query = ejs.MatchQuery('title', 'ahab');
-            es.search();       
+            // es.search();       
         });
 
         test('query not set', function(done) {

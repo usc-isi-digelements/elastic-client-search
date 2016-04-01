@@ -284,9 +284,9 @@
 
         resolveResultCount: function(results) {
             if(results && results.hits && results.hits.total !== undefined) {
-                return results.hits.total
+                return results.hits.total;
             } else if(results && results.hits && results.hits.hits) {
-                return results.hits.hits
+                return results.hits.hits;
             } else {
                 return 0;
             }
