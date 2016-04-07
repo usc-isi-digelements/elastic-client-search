@@ -75,23 +75,12 @@
             },
 
             /**
-             * The elasticsearch query that should be invoked. If this is not set
-             * the resulting elasticsearch query is "match_all"
+             * The elasticsearch query that should be invoked.
              */
             query: {
                 type: Object,
                 notify: true
             },
-
-            /**
-             * TODO: add comment
-             *
-             */
-             //This is redundant from pageSize
-            // size: {
-            //   type: Number,
-            //   notify: true
-            // },
 
             /**
              * TODO: add comment
@@ -198,7 +187,7 @@
 
         observers: [
             'basicSearch(body, index, client)',
-            'search(client, index, query, filters, aggregations)'
+            'search(client, type, index, query, filters, aggregations)'
         ],
 
         // ready: function() {
@@ -222,7 +211,7 @@
 
             this.client.search({
                 index: this.index,
-                type: this.indexType,
+                type: this.type,
                 body: this.body
             })
             .then(function(results) {
@@ -275,7 +264,7 @@
             var request = this.buildRequest();
             return this.client.search({
                 index: this.index,
-                type: this.indexType,
+                type: this.type,
                 size: this.pageSize,
                 from: this.pageSize * (this.page - 1),
                 body: request
