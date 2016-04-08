@@ -24,7 +24,7 @@
         <elastic-search
             client="[[esclient]]"
             index="ads"
-            index-type='["offer", "seller"]'
+            elastic-types='["offer", "seller"]'
             body='{"query": {"match_all": {}}}'
             results="{{data}}"
             lastError="{{error}}">
@@ -56,7 +56,7 @@
             /**
              * the elastic type (optional -- leave empty for all types)
              */
-            type: {
+            elasticTypes: {
                 type: Array,
                 value: []
             },
@@ -187,7 +187,7 @@
 
         observers: [
             'basicSearch(body, index, client)',
-            'search(client, type, index, query, filters, aggregations, page)'
+            'search(client, elasticTypes, index, query, filters, aggregations, page)'
         ],
 
         // ready: function() {
@@ -211,7 +211,7 @@
 
             this.client.search({
                 index: this.index,
-                type: this.type,
+                type: this.elasticTypes,
                 body: this.body
             })
             .then(function(results) {
@@ -264,7 +264,7 @@
             var request = this.buildRequest();
             return this.client.search({
                 index: this.index,
-                type: this.type,
+                type: this.elasticTypes,
                 size: this.pageSize,
                 from: this.pageSize * (this.page - 1),
                 body: request
