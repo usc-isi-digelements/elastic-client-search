@@ -192,7 +192,8 @@
             loading: {
                 type: Boolean,
                 value: false,
-                notify: true
+                notify: true,
+                readOnly: true
             }
         },
 
@@ -226,7 +227,7 @@
 
             var me = this;
 
-            this.loading = true;
+            this._setLoading(true);
             this.client.search({
                 index: this.index,
                 type: this.elasticTypes,
@@ -235,11 +236,11 @@
             .then(function(results) {
                 me._setResults(results);
                 me._setLastError(null);
-                me.loading = false;
+                me._setLoading(false);
             })
             .catch(function(err) {
                 me._setLastError(err);
-                me.loading = false;
+                me._setLoading(false);
             });
         },
 
@@ -250,11 +251,11 @@
             .then(function(results) {
                 me._setResults(results);
                 me._setLastError(null);
-                me.loading = false;
+                me._setLoading(false);
             })
             .catch(function(err) {
                 me._setLastError(err);
-                me.loading = false;
+                me._setLoading(false);
             });
         },
 
@@ -284,8 +285,8 @@
 
         getSearchPromise: function() {
             var request = this.buildRequest();
-            this.loading = true;
-             return this.client.search({
+            this._setLoading(true);
+            return this.client.search({
                 index: this.index,
                 type: this.elasticTypes,
                 size: this.pageSize,
