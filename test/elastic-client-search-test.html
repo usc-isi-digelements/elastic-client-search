@@ -53,6 +53,18 @@
           assert.deepEqual(es.elasticTypes, ['ad']);
         });
 
+        test('defines the page property', function () {
+          assert.equal(es.page, 1);
+        });
+
+        test('defines the pageSize property', function() {
+          assert.equal(es.pageSize, 25);
+        });
+
+        test('defines the loading property', function () {
+          assert.equal(es.loading, false);
+        });
+
         test('submits body', function (done) {
             es.addEventListener('results-changed', function (event) {
               expect(es.results).to.be.an('object');
