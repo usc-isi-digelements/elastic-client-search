@@ -79,7 +79,8 @@
              */
             query: {
                 type: Object,
-                notify: true
+                notify: true,
+                observer: '_resetPage'
             },
 
             /**
@@ -105,7 +106,8 @@
             pageSize: {
                 type: Number,
                 value: 25,
-                notify: true
+                notify: true,
+                observer: '_resetPage'
             },
 
             /**
@@ -182,6 +184,15 @@
                 type: Object,
                 notify: true,
                 readOnly: true
+            },
+
+            /**
+             *  indicate that search is in progress.
+             */
+            loading: {
+                type: Boolean,
+                value: false,
+                notify: true
             }
         },
 
@@ -198,6 +209,12 @@
 
 
         /**
+         * Reset page to 1.
+         */
+        _resetPage: function() {
+            this.page = 1;
+        },
+        /**
          * Performs a server request via the elasticsearch client; invoked whenevery this.query is changed.
          *
          * @return {ElasticSearchResults}
@@ -209,6 +226,7 @@
 
             var me = this;
 
+            this.loading = true;
             this.client.search({
                 index: this.index,
                 type: this.elasticTypes,
@@ -217,9 +235,11 @@
             .then(function(results) {
                 me._setResults(results);
                 me._setLastError(null);
+                me.loading = false;
             })
             .catch(function(err) {
                 me._setLastError(err);
+                me.loading = false;
             });
         },
 
@@ -230,9 +250,11 @@
             .then(function(results) {
                 me._setResults(results);
                 me._setLastError(null);
+                me.loading = false;
             })
             .catch(function(err) {
                 me._setLastError(err);
+                me.loading = false;
             });
         },
 
@@ -262,13 +284,15 @@
 
         getSearchPromise: function() {
             var request = this.buildRequest();
-            return this.client.search({
+            this.loading = true;
+             return this.client.search({
                 index: this.index,
                 type: this.elasticTypes,
                 size: this.pageSize,
                 from: this.pageSize * (this.page - 1),
                 body: request
             });
+
         },
 
         resolveResultCount: function(results) {
