@@ -137,7 +137,7 @@
             aggregations: {
                 type: Array,
                 notify: true,
-                value: []
+                value: {}
             },
 
             /**
@@ -194,6 +194,10 @@
                 value: false,
                 notify: true,
                 readOnly: true
+            },
+
+            activeFilter: {
+                type: Object
             }
         },
 
@@ -260,6 +264,7 @@
         },
 
         buildRequest: function() {
+            var me = this;
             var request = ejs.Request();
 
             if (this.query) {
@@ -268,13 +273,14 @@
                 request.query(ejs.MatchAllQuery());
             }
 
-            _.each(this.aggregations, function(agg) {
-                request.agg(agg);
-            });
-
             if(this.filters && this.filters.length > 0) {
-                request.filter(ejs.AndFilter(this.filters[0]));
+                this.activeFilter = ejs.AndFilter(this.filters);
+                request.filter(this.activeFilter);
             }
+
+            _.each(this.aggregations, function(agg) {
+                request.agg(me.applyAggregationFilter(agg));
+            });
 
             console.log(request.toJSON());
             // TODO: add logic to build entire request from properties.
@@ -304,6 +310,12 @@
             } else {
                 return 0;
             }
+        },
+
+        applyAggregationFilter: function(agg) {
+            var aggName = Object.keys(agg.toJSON())[0];
+            var filteredAgg = ejs.FilterAggregation(aggName).filter(this.activeFilter).agg(agg);
+            return filteredAgg;
         }
     });
 </script>
