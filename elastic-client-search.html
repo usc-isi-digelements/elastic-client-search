@@ -274,7 +274,7 @@
             }
 
             if(this.filters && this.filters.length > 0) {
-                this.activeFilter = ejs.AndFilter(this.filters);
+                this.activeFilter = this.buildFilter()
                 request.filter(this.activeFilter);
             }
 
@@ -314,8 +314,25 @@
 
         applyAggregationFilter: function(agg) {
             var aggName = Object.keys(agg.toJSON())[0];
-            var filteredAgg = ejs.FilterAggregation(aggName).filter(this.activeFilter).agg(agg);
+
+            //apply all filters except any matching this agg name
+            var filter = this.buildFilter(aggName);
+            var filteredAgg = ejs.FilterAggregation(aggName).filter(filter).agg(agg);
             return filteredAgg;
+        },
+
+        buildFilter: function(excludeName) {
+            if(!excludeName) {
+                return ejs.AndFilter(this.filters);
+            }
+
+            var remainingFilters = [];
+            _.each(this.filters, function(filter) {
+                if(!filter.name() || filter.name() !== excludeName) {
+                    remainingFilters.push(filter);
+                }
+            });
+            return ejs.AndFilter(remainingFilters);
         }
     });
 </script>
