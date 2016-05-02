@@ -41,7 +41,9 @@
           es = fixture('elastic-client-search-fixture');
           client = new elasticsearch.Client({host: 'http://localhost:9200'});
           es.client = client;
+          es.sort = 'Sort("date").order("asc")';
           esBad.client = client;
+
           body = ejs.Request().query(ejs.MatchAllQuery());
         });
 
@@ -63,6 +65,29 @@
 
         test('defines the loading property', function () {
           assert.equal(es.loading, false);
+        });
+
+        test('defines the sort property', function () {
+          assert.equal(es.sort, 'Sort("date").order("asc")');
+        });
+
+        test('buildRequest returns request with expected query and sort', function() {
+          var request = es.buildRequest();
+          var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).sort(ejs.Sort('date').order('asc'));
+
+          assert.deepEqual(request.toJSON().query, expectedReqVals.toJSON().query);
+          assert.deepEqual(request.toJSON().sort, expectedReqVals.toJSON().sort);
+          assert.isUndefined(es.lastError);
+        });
+
+        test('if sort input for buildRequest is not valid, lastError is updated', function() {
+          es.sort = 'invalidFunction()';
+          var request = es.buildRequest();
+          var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery());
+
+          assert.deepEqual(request.toJSON().query, expectedReqVals.toJSON().query);
+          assert.isUndefined(request.toJSON().sort);
+          assert.isDefined(es.lastError);
         });
 
         test('submits body', function (done) {
