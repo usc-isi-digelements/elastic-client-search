@@ -86,12 +86,10 @@
             },
 
             /**
-             * a partial string to be evaluated into an ejs.Sort() object
-             * example: 'Sort("date").order("asc")'
-             *
+             * an ejs.Sort() object to add to the request
              */
             sort: {
-                type: String,
+                type: Object,
                 notify: true
             },
 
@@ -284,13 +282,8 @@
                 request.filter(this.activeFilter);
             }
 
-            if(this.sort && this.sort.length > 0) {
-                try {
-                    request.sort(eval('ejs.' + this.sort));
-                } catch(err) {
-                    //console.error(err);
-                    this._setLastError(err);
-                }
+            if(this.sort && !_.isEmpty(this.sort)) {
+                request.sort(this.sort);
             }
 
             _.each(this.aggregations, function(agg) {
