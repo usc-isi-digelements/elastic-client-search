@@ -34,8 +34,8 @@
 
 -->
 <script>
-    /* globals _, ejs*/
     Polymer({
+        /* globals _, ejs*/
         is: 'elastic-client-search',
 
         properties: {
@@ -265,7 +265,11 @@
                 me._setLoading(false);
             });
         },
-
+        /**
+         * Builds an ejs.Request() object based on various inputs.
+         *
+         * @return {ElasticSearchRequest}
+         */
         buildRequest: function() {
             var me = this;
             var request = ejs.Request();
