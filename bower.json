@@ -22,11 +22,10 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^1.2.0",
     "elastic-client": "DigElements/elastic-client#^0.0.3",
-    "lodash": "^4.6.1"
+    "dig-common": "DigElements/dig-common#^0.0.4"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
-    "web-component-tester": "^3.4.0",
-    "elastic.js": "^1.2.0"
+    "web-component-tester": "^3.4.0"
   }
 }
