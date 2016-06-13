@@ -126,13 +126,15 @@
             },
 
             /**
-             * TODO: add comment
-             *
+             * Array of ejs filters to use
              */
             filters: {
                 type: Array,
                 notify: true,
-                value: []
+                value: function() {
+                    return [];
+                },
+                observer: '_resetPage'
             },
 
             /**

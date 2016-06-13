@@ -67,6 +67,10 @@
           assert.equal(es.loading, false);
         });
 
+        test('defines the filters property', function () {
+          assert.deepEqual(es.filters, []);
+        });
+
         test('defines the sort property', function () {
           assert.deepEqual(es.sort.toJSON(), ejs.Sort("date").order("asc").toJSON());
         });
@@ -118,6 +122,14 @@
               done();
             });
             esBad.body = body;
+        });
+
+        test('_resetPage resets page to 1', function() {
+          es.page = 2;
+          assert.equal(es.page, 2);
+
+          es._resetPage();
+          assert.equal(es.page, 1);
         });
       });
     </script>
