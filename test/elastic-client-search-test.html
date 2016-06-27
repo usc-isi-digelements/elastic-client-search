@@ -81,7 +81,7 @@
 
           assert.deepEqual(request.toJSON().query, expectedReqVals.toJSON().query);
           assert.deepEqual(request.toJSON().sort, expectedReqVals.toJSON().sort);
-          assert.isUndefined(es.lastError);
+          assert.isNull(es.lastError);
         });
 
         test('submits body', function (done) {
@@ -89,7 +89,7 @@
               expect(es.results).to.be.an('object');
               expect(es.results).to.not.be.empty;
               expect(es.results).to.include.keys('hits');
-              expect(es.lastError).to.not.exist;
+              assert.isNull(es.lastError);
               assert.equal(es.results.hits.hits[0]._type, 'ad');
               done();
             });
@@ -101,7 +101,7 @@
               expect(es.results).to.be.an('object');
               expect(es.results).to.not.be.empty;
               expect(es.results).to.include.keys('hits');
-              expect(es.lastError).to.not.exist;
+              assert.isNull(es.lastError);
               assert.equal(es.results.hits.hits[0]._type, 'ad');
               assert.equal(es.results.hits.hits.length, 25);
               expect(es.results.hits.total).to.be.at.least(30);

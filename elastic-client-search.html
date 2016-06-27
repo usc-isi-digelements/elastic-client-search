@@ -20,14 +20,14 @@
             cluster-status="{{my-status}}">
         </elastic-client>
 
-        <elastic-search
+        <elastic-client-search
             client="[[esclient]]"
             index="ads"
             elastic-types='["offer", "seller"]'
             body='{"query": {"match_all": {}}}'
             results="{{data}}"
             lastError="{{error}}">
-        </elastic-search>
+        </elastic-client-search>
 
 @demo demo/index.html
 
@@ -189,6 +189,7 @@
              */
             lastError: {
                 type: Object,
+                value: null,
                 notify: true,
                 readOnly: true
             },
