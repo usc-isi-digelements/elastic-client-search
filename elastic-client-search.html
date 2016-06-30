@@ -251,6 +251,7 @@
                 me._setLoading(false);
             })
             .catch(function(err) {
+                me._setResults({});
                 me._setLastError(err);
                 me._setLoading(false);
             });
@@ -266,6 +267,7 @@
                 me._setLoading(false);
             })
             .catch(function(err) {
+                me._setResults({});
                 me._setLastError(err);
                 me._setLoading(false);
             });
