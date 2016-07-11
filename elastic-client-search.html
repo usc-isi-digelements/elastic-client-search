@@ -233,7 +233,7 @@
          * @return {ElasticSearchResults}
          */
         basicSearch: function() {
-            if(!this.body) {
+            if(this.loading || !this.body) {
                 return;
             }
 
@@ -258,6 +258,10 @@
         },
 
         search: function() {
+            if(this.loading) {
+                return;
+            }
+
             var me = this;
 
             me._setLastError(null);
