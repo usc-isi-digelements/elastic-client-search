@@ -240,6 +240,8 @@
             var me = this;
 
             this._setLoading(true);
+            me._setLastError(null);
+            me._setResults(null);
             this.client.search({
                 index: this.index,
                 type: this.elasticTypes,
@@ -247,11 +249,9 @@
             })
             .then(function(results) {
                 me._setResults(results);
-                me._setLastError(null);
                 me._setLoading(false);
             })
             .catch(function(err) {
-                me._setResults({});
                 me._setLastError(err);
                 me._setLoading(false);
             });
@@ -260,14 +260,14 @@
         search: function() {
             var me = this;
 
+            me._setLastError(null);
+            me._setResults(null);
             this.getSearchPromise()
             .then(function(results) {
                 me._setResults(results);
-                me._setLastError(null);
                 me._setLoading(false);
             })
             .catch(function(err) {
-                me._setResults({});
                 me._setLastError(err);
                 me._setLoading(false);
             });

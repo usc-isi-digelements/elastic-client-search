@@ -1,8 +1,8 @@
 {
   "name": "elastic-client-search",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "authors": [
-    "David Flynt"
+    "Next Century"
   ],
   "description": "An element providing a solution to no problem in particular.",
   "keywords": [

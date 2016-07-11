@@ -118,7 +118,7 @@
 
         test('when a search fails', function (done) {
             esBad.addEventListener('last-error-changed', function (event) {
-              expect(esBad.results).to.be.an('object');
+              expect(esBad.results).to.be.null;
               expect(esBad.lastError).to.exist;
               done();
             });
