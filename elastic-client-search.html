@@ -205,9 +205,10 @@
 
             var me = this;
 
-            this._setLoading(true);
+            // Set last-error and results first so other components can update prior to loading.
             this._setLastError(null);
             this._setResults(null);
+            this._setLoading(true);
             this.client.search({
                 index: this.index,
                 type: this.elasticTypes,
@@ -230,9 +231,10 @@
 
             var me = this;
 
-            this._setLoading(true);
+            // Set last-error and results first so other components can update prior to loading.
             this._setLastError(null);
             this._setResults(null);
+            this._setLoading(true);
             this.client.search({
                 index: this.index,
                 type: this.elasticTypes,
