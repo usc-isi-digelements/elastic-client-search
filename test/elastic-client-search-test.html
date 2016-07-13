@@ -67,8 +67,12 @@
           assert.equal(es.loading, false);
         });
 
-        test('defines the filters property', function () {
-          assert.deepEqual(es.filters, []);
+        test('does not define the aggregations property', function () {
+          assert.isUndefined(es.aggregations);
+        });
+
+        test('does not define the filters property', function () {
+          assert.isUndefined(es.filters);
         });
 
         test('defines the sort property', function () {
@@ -109,6 +113,8 @@
               done();
             });
 
+            es.aggregations = [];
+            es.filters = [];
             es.query = ejs.MatchQuery('title', 'ahab');   
         });
 
