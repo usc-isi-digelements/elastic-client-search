@@ -123,7 +123,7 @@
             },
 
             /**
-             * Array of ejs filters to use
+             * An elasticjs filter object or array of elasticjs filter objects.
              */
             filters: {
                 type: Array,
@@ -132,7 +132,7 @@
             },
 
             /**
-             * The list of ejs aggregation filter objects.
+             * An elasticjs aggregation filter object or array of elasticjs aggregation filter objects.
              */
             aggregations: {
                 type: Array,
@@ -267,8 +267,9 @@
                 request.query(ejs.MatchAllQuery());
             }
 
-            if(this.filters && this.filters.length > 0) {
-                this.activeFilter = this.buildFilter();
+            var filterArray = (this.filters ? ((this.filters.constructor === Array) ? this.filters : [this.filters]) : []);
+            if(filterArray.length) {
+                this.activeFilter = this.buildFilter(filterArray);
                 request.filter(this.activeFilter);
             }
 
@@ -276,8 +277,9 @@
                 request.sort(this.sort);
             }
 
-            _.each(this.aggregations, function(agg) {
-                request.agg(me.applyAggregationFilter(agg));
+            var aggregationArray = (this.aggregations ? ((this.aggregations.constructor === Array) ? this.aggregations : [this.aggregations]) : []);
+            _.each(aggregationArray, function(aggregation) {
+                request.agg(me.applyAggregationFilter(aggregation));
             });
 
             // TODO: add logic to build entire request from properties.
@@ -300,18 +302,19 @@
             var aggName = Object.keys(agg.toJSON())[0];
 
             //apply all filters except any matching this agg name
-            var filter = this.buildFilter(aggName);
+            var filterArray = (this.filters ? ((this.filters.constructor === Array) ? this.filters : [this.filters]) : []);
+            var filter = this.buildFilter(filterArray, aggName);
             var filteredAgg = ejs.FilterAggregation(aggName).filter(filter).agg(agg);
             return filteredAgg;
         },
 
-        buildFilter: function(excludeName) {
+        buildFilter: function(filters, excludeName) {
             if(!excludeName) {
-                return ejs.AndFilter(this.filters);
+                return ejs.AndFilter(filters);
             }
 
             var remainingFilters = [];
-            _.each(this.filters, function(filter) {
+            _.each(filters, function(filter) {
                 if(!filter.name() || filter.name() !== excludeName) {
                     remainingFilters.push(filter);
                 }
