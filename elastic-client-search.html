@@ -95,6 +95,22 @@
             },
 
             /**
+             * The field on which to sort.  Must also define sortOrder.  Overridden by defining sort.
+             */
+            sortField: {
+                type: String,
+                value: ''
+            },
+
+            /**
+             * The order on which to sort.  Must also define sortField.  Overridden by defining sort.
+             */
+            sortOrder: {
+                type: String,
+                value: ''
+            },
+
+            /**
              * The number of the current page of search results.
              */
             page: {
@@ -183,7 +199,7 @@
 
         observers: [
             'basicSearch(body, index, client)',
-            'search(client, elasticTypes, index, query, filters, aggregations, page, sort)'
+            'search(client, elasticTypes, index, query, filters, aggregations, page, sort, sortOrder, sortField)'
         ],
 
         /**
@@ -275,6 +291,8 @@
 
             if(this.sort && !_.isEmpty(this.sort)) {
                 request.sort(this.sort);
+            } else if(this.sortField && this.sortOrder) {
+                request.sort(ejs.Sort(this.sortField).order(this.sortOrder));
             }
 
             var aggregationArray = (this.aggregations ? ((this.aggregations.constructor === Array) ? this.aggregations : [this.aggregations]) : []);
