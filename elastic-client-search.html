@@ -221,7 +221,7 @@
 
             var me = this;
 
-            // Set last-error and results first so other components can update prior to loading.
+            // Set 'last-error' and 'results' before 'loading' because we want other components to update their error and results but may not do so if 'loading' is true.
             this._setLastError(null);
             this._setResults(null);
             this._setLoading(true);
@@ -247,7 +247,7 @@
 
             var me = this;
 
-            // Set last-error and results first so other components can update prior to loading.
+            // Set 'last-error' and 'results' before 'loading' because we want other components to update their error and results but may not do so if 'loading' is true.
             this._setLastError(null);
             this._setResults(null);
             this._setLoading(true);
