@@ -156,6 +156,14 @@
             },
 
             /**
+             * The timeout for the elasticsearch query in milliseconds.
+             */
+            timeout: {
+                type: Number,
+                value: 60000
+            },
+
+            /**
              * elastic search JSON results available after a successful query.
              */
             results: {
@@ -226,6 +234,7 @@
             this._setResults(null);
             this._setLoading(true);
             this.client.search({
+                requestTimeout: this.timeout,
                 index: this.index,
                 type: this.elasticTypes,
                 body: this.body
@@ -252,6 +261,7 @@
             this._setResults(null);
             this._setLoading(true);
             this.client.search({
+                requestTimeout: this.timeout,
                 index: this.index,
                 type: this.elasticTypes,
                 size: this.pageSize,
