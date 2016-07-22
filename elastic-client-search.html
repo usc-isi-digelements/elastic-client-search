@@ -231,12 +231,12 @@
                 body: this.body
             })
             .then(function(results) {
-                me._setResults(results);
                 me._setLoading(false);
+                me._setResults(results);
             })
             .catch(function(err) {
-                me._setLastError(err);
                 me._setLoading(false);
+                me._setLastError(err);
             });
         },
 
@@ -259,12 +259,12 @@
                 body: this.buildRequest()
             })
             .then(function(results) {
-                me._setResults(results);
                 me._setLoading(false);
+                me._setResults(results);
             })
             .catch(function(err) {
-                me._setLastError(err);
                 me._setLoading(false);
+                me._setLastError(err);
             });
         },
 
