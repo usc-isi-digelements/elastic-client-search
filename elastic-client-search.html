@@ -139,7 +139,7 @@
             },
 
             /**
-             * An elasticjs filter object or array of elasticjs filter objects.  Must be defined for searches using the query property.
+             * An elasticjs filter object or array of elasticjs filter objects.  This property must be defined for searches using the query property.
              */
             filters: {
                 type: Array,
@@ -148,11 +148,18 @@
             },
 
             /**
-             * An elasticjs aggregation filter object or array of elasticjs aggregation filter objects.  Must be defined for searches using the query property.
+             * An elasticjs aggregation filter object or array of elasticjs aggregation filter objects.  This property must be defined for searches using the query property.
              */
             aggregations: {
                 type: Array,
                 notify: true
+            },
+
+            /**
+             * An elasticjs highlight object.
+             */
+            highlight: {
+                type: Object
             },
 
             /**
@@ -309,6 +316,10 @@
             _.each(aggregationArray, function(aggregation) {
                 request.agg(me.applyAggregationFilter(aggregation));
             });
+
+            if(this.highlight) {
+                request.highlight(this.highlight);
+            }
 
             // TODO: add logic to build entire request from properties.
             // see: https://github.com/YousefED/ElasticUI/src/controllers/IndexController.ts
