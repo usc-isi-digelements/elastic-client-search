@@ -75,6 +75,10 @@
           assert.isUndefined(es.filters);
         });
 
+        test('does not define the requestAsJson property', function () {
+          assert.isUndefined(es.requestAsJson);
+        });
+
         test('defines the sort property', function () {
           assert.deepEqual(es.sort.toJSON(), ejs.Sort("date").order("asc").toJSON());
         });
@@ -83,6 +87,7 @@
           var request = es.buildRequest();
           var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).sort(ejs.Sort('date').order('asc'));
 
+          assert.deepEqual(es.requestAsJson, expectedReqVals.toJSON());
           assert.deepEqual(request.toJSON().query, expectedReqVals.toJSON().query);
           assert.deepEqual(request.toJSON().sort, expectedReqVals.toJSON().sort);
           assert.isNull(es.lastError);

@@ -209,6 +209,16 @@
 
             activeFilter: {
                 type: Object
+            },
+
+            /**
+             * Read-only object containing request body built by
+             * elastic-client-search and sent to elasticsearch.
+             */
+            requestAsJson: {
+                type: Object,
+                readOnly: true,
+                notify: true
             }
         },
 
@@ -324,6 +334,7 @@
             // TODO: add logic to build entire request from properties.
             // see: https://github.com/YousefED/ElasticUI/src/controllers/IndexController.ts
             // for general idea
+            this._setRequestAsJson(request.toJSON());
             return request;
         },
 
