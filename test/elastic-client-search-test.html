@@ -83,6 +83,10 @@
           assert.deepEqual(es.sort.toJSON(), ejs.Sort("date").order("asc").toJSON());
         });
 
+        test('defines the propertiesReady property', function () {
+          assert.isTrue(es.propertiesReady);
+        });
+
         test('buildRequest returns request with expected query and sort', function() {
           var request = es.buildRequest();
           var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).sort(ejs.Sort('date').order('asc'));

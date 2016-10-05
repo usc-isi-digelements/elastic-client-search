@@ -219,12 +219,22 @@
                 type: Object,
                 readOnly: true,
                 notify: true
+            },
+
+            /**
+             * Whether or not all applicable properties are ready for an elasticsearch request to be created.
+             * Defaults to true.
+             */
+            propertiesReady: {
+                type: Boolean,
+                notify: true,
+                value: true
             }
         },
 
         observers: [
             'basicSearch(body, index, client)',
-            'search(client, elasticTypes, index, query, filters, aggregations, page, sort, sortOrder, sortField)'
+            'search(propertiesReady, client, elasticTypes, index, query, filters, aggregations, page, sort, sortOrder, sortField)'
         ],
 
         /**
@@ -269,6 +279,10 @@
         search: function() {
             if(this.loading) {
               return;
+            }
+
+            if(!this.propertiesReady) {
+                return;
             }
 
             var me = this;
