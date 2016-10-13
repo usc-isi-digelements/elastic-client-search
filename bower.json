@@ -1,10 +1,10 @@
 {
   "name": "elastic-client-search",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "authors": [
     "Next Century"
   ],
-  "description": "An element providing a solution to no problem in particular.",
+  "description": "Element which provides a web component interface to the elasticsearch client search API, and coordinates building and issuing queries using the elastic.js library.",
   "keywords": [
     "Elasticsearch",
     "elastic",

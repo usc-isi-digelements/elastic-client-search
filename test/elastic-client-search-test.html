@@ -83,8 +83,16 @@
           assert.deepEqual(es.sort.toJSON(), ejs.Sort("date").order("asc").toJSON());
         });
 
-        test('defines the propertiesReady property', function () {
-          assert.isTrue(es.propertiesReady);
+        test('defines the sourceEnabled property', function () {
+          assert.isTrue(es.sourceEnabled);
+        });
+
+        test('defines the sourceInclude property', function () {
+          assert.deepEqual(es.sourceInclude, []);
+        });
+
+        test('defines the sourceExclude property', function () {
+          assert.deepEqual(es.sourceExclude, []);
         });
 
         test('buildRequest returns request with expected query and sort', function() {
@@ -147,6 +155,22 @@
           es._resetPage();
           assert.equal(es.page, 1);
         });
+
+        test('buildRequest returns request with expected source properties', function() {
+          es.sourceInclude = ['city', 'title'];
+          es.sourceExclude = ['username'];
+          var request = es.buildRequest();
+          var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).sort(ejs.Sort('date').order('asc')).source(['city', 'title'], ['username']);
+        });
+
+        test('buildRequest returns request with source set to false', function() {
+          es.sourceInclude = ['city', 'title'];
+          es.sourceExclude = ['username'];
+          es.sourceEnabled = false;
+          var request = es.buildRequest();
+          var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).sort(ejs.Sort('date').order('asc')).source(false);
+        });
+
       });
     </script>
 

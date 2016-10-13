@@ -229,12 +229,53 @@
                 type: Boolean,
                 notify: true,
                 value: true
+            },
+
+            /**
+             * Whether or not _source object comes back with elasticsearch results. Defaults to true. If false,
+             * sourceInclude and sourceExclude fields will be ignored.
+             */
+            sourceEnabled: {
+                type: Boolean,
+                notify: true,
+                value: true
+            },
+
+            /**
+             * Specify which parts from _source object to return from elasticsearch. Ignored if sourceEnabled
+             * is false.
+             * Note: if only sourceInclude is specified, all other parts of _source will be excluded automatically.
+             * See more about source filtering here:
+             * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html
+             */
+            sourceInclude: {
+                type: Array,
+                notify: true,
+                value: function() {
+                    return [];
+                }
+            },
+
+            /**
+             * Specify which parts from _source object to omit from results returned. Ignored if sourceEnabled
+             * is false.
+             * Note: if only sourceExclude is specified, all other parts of _source will be included automatically.
+             * See more about source filtering here:
+             * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html
+             */
+            sourceExclude: {
+                type: Array,
+                notify: true,
+                value: function() {
+                    return [];
+                }
             }
+
         },
 
         observers: [
             'basicSearch(body, index, client)',
-            'search(propertiesReady, client, elasticTypes, index, query, filters, aggregations, page, sort, sortOrder, sortField)'
+            'search(propertiesReady, client, elasticTypes, index, query, filters, aggregations, page, sort, sortOrder, sortField, sourceEnabled, sourceInclude, sourceExclude)'
         ],
 
         /**
@@ -343,6 +384,12 @@
 
             if(this.highlight) {
                 request.highlight(this.highlight);
+            }
+
+            if(!this.sourceEnabled) {
+                request.source(false);
+            } else if(this.sourceInclude.length > 0 || this.sourceExclude.length > 0) {
+                request.source(this.sourceInclude, this.sourceExclude);
             }
 
             // TODO: add logic to build entire request from properties.
