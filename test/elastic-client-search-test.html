@@ -171,6 +171,22 @@
           var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).sort(ejs.Sort('date').order('asc')).source(false);
         });
 
+        test('buildRequest returns request with sourceInclude set', function() {
+          es.sourceInclude = ['city', 'title'];
+          es.sourceExclude = [];
+          es.sourceEnabled = true;
+          var request = es.buildRequest();
+          var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).sort(ejs.Sort('date').order('asc')).source(['city', 'title'], []);
+        });
+
+        test('buildRequest returns request with sourceExclude set', function() {
+          es.sourceInclude = [];
+          es.sourceExclude = ['username'];
+          es.sourceEnabled = true;
+          var request = es.buildRequest();
+          var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).sort(ejs.Sort('date').order('asc')).source([], ['username']);
+        });
+
       });
     </script>
 
