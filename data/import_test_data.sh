@@ -31,9 +31,6 @@ curl -XPUT localhost:9200/mockads -d '
           "type" : "string",
           "index" : "not_analyzed"
         },
-        "ethnicity" : {
-          "type" : "string"
-        },
         "eye_color" : {
           "type" : "string",
           "index" : "not_analyzed"
