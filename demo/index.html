@@ -10,12 +10,14 @@
     <link rel="import" href="../elastic-client-search.html">
   </head>
   <body unresolved>
-    <template is="dom-bind">
+    <template is="dom-bind" id="demo">
       <elastic-client
         config='{"host": "http://localhost:9200"}'
         client="{{esclient}}"
-        cluster-status="{{my-status}}">
+        cluster-status="{{myStatus}}">
       </elastic-client>
+
+      <p>Cluster Status: {{myStatus}}</p>
 
       <elastic-client-search
         client="[[esclient]]"
@@ -23,22 +25,30 @@
         type='["ad"]'
         body='{"query": {"match_all": {}}}'
         results="{{data}}"
-        lastError="{{error}}"
-        available-types="{{types}}">
+        last-error="{{error}}">
       </elastic-client-search>
 
-      <span>Types: {{types.length}}</span>
-      <template is="dom-repeat" items={{types}} as=type>
-          <p>{{type}}</p>
-      </template>
-      <br>
+      <p>Host: http://localhost:9200</p>
+      <p>Types: ["ad"]</p>
+      <p>Index: mockads</p>
+      <p>Query Body: {"query": {"match_all": {}}}</p>
+      <p>Error (if any): {{stringify(error)}}</p>
 
-      <span>hits: {{data.hits.total}}</span>
-      <template is="dom-repeat" items={{data.hits.hits}} as=item>
-          <p>{{item._source.title}}</p>
-        </div>
-      </template>
-
+      <span>Results: {{data.hits.total}} (only showing first {{data.hits.hits.length}}):</span>
+      <ul>
+        <template is="dom-repeat" items="{{data.hits.hits}}" as="item">
+          <li>Title: {{item._source.title}}</li>
+        </template>
+      </ul>
     </template>
+    <script>
+      (function(document) {
+        var demo = document.querySelector('#demo');
+
+        demo.stringify = function(data) {
+          return JSON.stringify(data);
+        };
+      })(document);
+    </script>
   </body>
 </html>

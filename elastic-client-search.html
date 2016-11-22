@@ -3,31 +3,31 @@
 
 <!--
 
-        Element which provides a view of an Elasticsearch index, and coordinates
-        building and issuing queries using the elastic.js library.  Satellite
-        elements for query, filters, aggregation, sorting, and paging communicate
-        with this element to make changes to the index object, and to receive
-        results from queries that are issued to an elastic server instance.
+Element which provides a view of an Elasticsearch index, and coordinates
+building and issuing queries using the elastic.js library.  Satellite
+elements for query, filters, aggregation, sorting, and paging communicate
+with this element to make changes to the index object, and to receive
+results from queries that are issued to an elastic server instance.
 
-        If given a body object as input, this element makes AJAX request to
-        elasticsearch REST API.
+If given a body object as input, this element makes AJAX request to
+elasticsearch REST API.
 
-        Example:
+Example:
 
-        <elastic-client
-            config='{"host": "http://localhost:9200"}'
-            client="{{esclient}}"
-            cluster-status="{{my-status}}">
-        </elastic-client>
+    <elastic-client
+        config='{"host": "http://localhost:9200"}'
+        client="{{esclient}}"
+        cluster-status="{{my-status}}">
+    </elastic-client>
 
-        <elastic-client-search
-            client="[[esclient]]"
-            index="ads"
-            elastic-types='["offer", "seller"]'
-            body='{"query": {"match_all": {}}}'
-            results="{{data}}"
-            lastError="{{error}}">
-        </elastic-client-search>
+    <elastic-client-search
+        client="[[esclient]]"
+        index="ads"
+        elastic-types='["offer", "seller"]'
+        body='{"query": {"match_all": {}}}'
+        results="{{data}}"
+        lastError="{{error}}">
+    </elastic-client-search>
 
 @demo demo/index.html
 
@@ -305,7 +305,9 @@
                 requestTimeout: this.timeout,
                 index: this.index,
                 type: this.elasticTypes,
-                body: this.body
+                body: this.body,
+                size: this.pageSize,
+                from: this.pageSize * (this.page - 1)
             })
             .then(function(results) {
                 me._setLoading(false);
