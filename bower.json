@@ -6,11 +6,11 @@
   ],
   "description": "A Polymer Element which provides a web component interface to the elasticsearch client search API, and coordinates building and issuing queries using the elastic.js library.",
   "keywords": [
-    "Elasticsearch",
-    "elastic",
-    "ElasticUI",
     "web-component",
-    "polymer"
+    "polymer",
+    "elastic",
+    "elasticsearch",
+    "elastic.js"
   ],
   "main": "elastic-client-search.html",
   "license": "http://polymer.github.io/LICENSE.txt",
