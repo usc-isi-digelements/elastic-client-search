@@ -1,16 +1,48 @@
 # elastic-client-search
 
-Element which provides a web component interface to the elasticsearch client search API, and coordinates building and issuing queries using the elastic.js library.  Satellite elements for query, filters, aggregation, sorting, and paging communicate with this element to make changes to the index object, and to receive results from queries that are issued to an elastic server instance.  
+A Polymer Element which provides a web component interface to the elasticsearch client search API, and coordinates building and issuing queries using the elastic.js library.  Satellite elements for query, filters, aggregation, sorting, and paging communicate with this element to make changes to the index object, and to receive results from queries that are issued to an elastic server instance.  
 
+### Example
+```html
+<elastic-client
+  config='{"host": "http://localhost:9200"}'
+  client="{{esclient}}"
+  cluster-status="{{my-status}}">
+</elastic-client>
 
-## Credit to <a href="https://github.com/YousefED/ElasticUI" target="_blank">ElasticUI</a>
-This suite of web components is inspired by the angular project ElasticUI:  Many of the ng directives used in that project are mimicked with these web components.
+<elastic-client-search
+  client="[[esclient]]"
+  index="[[myIndex]]"
+  query="[[ejsQuery]]"
+  aggregations="[]"
+  filters="[[ejsFilters]]"
+  results="{{queryResults}}"
+  result-count="{{resultCount}}"
+  last-error="{{queryError}}"
+  loading="{{loading}}">
+</elastic-client-search>
+```
 
+### Dependencies
 
-## Dependencies
+Dependencies are installed using [Bower](http://bower.io/):
 
-* Elasticsearch server instance
-* mockads index (run data/import_test_data.sh after installing and starting elastic search) 
+    npm install -g bower
+    bower install
 
+### Testing
 
+Tests require a local instance of elasticsearch with the `mockads` index created by running `data/import_test_data.sh`.
+
+Tests are run using [web-component-tester](https://github.com/Polymer/web-component-tester):
+
+    npm install -g web-component-tester
+    wct
+
+### Demonstration & Documentation
+
+Demonstration and documentation are viewed using [polyserve](https://github.com/PolymerLabs/polyserve):
+
+    npm install -g polyserve
+    polyserve
 

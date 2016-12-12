@@ -1,9 +1,10 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../dig-common/dig-common.html">
+<script src="../elasticsearch/elasticsearch.js"></script>
+<script src="../elastic.js/dist/elastic.js"></script>
+<script src="../lodash/dist/lodash.js"></script>
 
 <!--
-
-Element which provides a view of an Elasticsearch index, and coordinates
+A Polymer Element which provides a view of an Elasticsearch index, and coordinates
 building and issuing queries using the elastic.js library.  Satellite
 elements for query, filters, aggregation, sorting, and paging communicate
 with this element to make changes to the index object, and to receive
@@ -12,26 +13,30 @@ results from queries that are issued to an elastic server instance.
 If given a body object as input, this element makes AJAX request to
 elasticsearch REST API.
 
-Example:
+### Example
+```html
+<elastic-client
+  config='{"host": "http://localhost:9200"}'
+  client="{{esclient}}"
+  cluster-status="{{my-status}}">
+</elastic-client>
 
-    <elastic-client
-        config='{"host": "http://localhost:9200"}'
-        client="{{esclient}}"
-        cluster-status="{{my-status}}">
-    </elastic-client>
-
-    <elastic-client-search
-        client="[[esclient]]"
-        index="ads"
-        elastic-types='["offer", "seller"]'
-        body='{"query": {"match_all": {}}}'
-        results="{{data}}"
-        lastError="{{error}}">
-    </elastic-client-search>
+<elastic-client-search
+  client="[[esclient]]"
+  index="[[myIndex]]"
+  query="[[ejsQuery]]"
+  aggregations="[]"
+  filters="[[ejsFilters]]"
+  results="{{queryResults}}"
+  result-count="{{resultCount}}"
+  last-error="{{queryError}}"
+  loading="{{loading}}">
+</elastic-client-search>
+```
 
 @demo demo/index.html
-
 -->
+
 <script>
     Polymer({
         /* globals _, ejs*/
@@ -39,22 +44,34 @@ Example:
 
         properties: {
             /**
-             * an instance of elasticsearch.Client which is connected to
-             * an elasticsearch server
+             * (Required)
+             *
+             * An instance of elasticsearch.Client which is connected to an elasticsearch server.
+             *
+             * @type {Object}
              */
             client: {
                 type: Object
             },
 
             /**
-             * the elastic index (database name)
+             * (Required)
+             *
+             * The elastic index (database name).
+             *
+             * @type {String}
              */
             index: {
                 type: String
             },
 
             /**
-             * the elastic type (optional -- leave empty for all types)
+             * (Optional)
+             *
+             * The elastic type (all types if empty array).
+             *
+             * @type {Array}
+             * @default []
              */
             elasticTypes: {
                 type: Array,
@@ -62,12 +79,11 @@ Example:
             },
 
             /**
-             * a fully specified elastic query.  Use this if you do not want
-             * the query body to be built by this element.
-             * (see https://www.elastic.co for search API)
+             * (Required)
              *
-             * I body is non-null, then the basicSearch observer will be invoked.
+             * A fully specified elastic query.  Use this if you do not want the query body to be built by this element.  (See https://www.elastic.co for search API.)
              *
+             * @type {Object}
              */
             body: {
                 type: Object,
@@ -75,7 +91,11 @@ Example:
             },
 
             /**
+             * (Required)
+             *
              * The elasticsearch query that should be invoked.
+             *
+             * @type {Object}
              */
             query: {
                 type: Object,
@@ -84,7 +104,12 @@ Example:
             },
 
             /**
-             * an ejs.Sort() object to add to the request
+             * (Optional)
+             *
+             * An ejs.Sort() object to add to the request.
+             *
+             * @type {Object}
+             * @default {}
              */
             sort: {
                 type: Object,
@@ -95,7 +120,12 @@ Example:
             },
 
             /**
+             * (Optional)
+             *
              * The field on which to sort.  Must also define sortOrder.  Overridden by defining sort.
+             *
+             * @type {String}
+             * @default ''
              */
             sortField: {
                 type: String,
@@ -103,7 +133,12 @@ Example:
             },
 
             /**
+             * (Optional)
+             *
              * The order on which to sort.  Must also define sortField.  Overridden by defining sort.
+             *
+             * @type {String}
+             * @default ''
              */
             sortOrder: {
                 type: String,
@@ -111,7 +146,12 @@ Example:
             },
 
             /**
+             * (Optional|Output)
+             *
              * The number of the current page of search results.
+             *
+             * @type {Number}
+             * @default 1
              */
             page: {
                 type: Number,
@@ -120,7 +160,12 @@ Example:
             },
 
             /**
+             * (Optional)
+             *
              * The size of each page of search results.
+             *
+             * @type {Number}
+             * @default 25
              */
             pageSize: {
                 type: Number,
@@ -130,7 +175,12 @@ Example:
             },
 
             /**
+             * (Optional)
+             *
              * The number of pages of search results.
+             *
+             * @type {Number}
+             * @default 1
              */
             pageCount: {
                 type: Number,
@@ -139,7 +189,11 @@ Example:
             },
 
             /**
+             * (Required)
+             *
              * An elasticjs filter object or array of elasticjs filter objects.  This property must be defined for searches using the query property.
+             *
+             * @type {Array}
              */
             filters: {
                 type: Array,
@@ -148,7 +202,11 @@ Example:
             },
 
             /**
+             * (Required)
+             *
              * An elasticjs aggregation filter object or array of elasticjs aggregation filter objects.  This property must be defined for searches using the query property.
+             *
+             * @type {Array}
              */
             aggregations: {
                 type: Array,
@@ -156,14 +214,23 @@ Example:
             },
 
             /**
+             * (Optional)
+             *
              * An elasticjs highlight object.
+             *
+             * @type {Object}
              */
             highlight: {
                 type: Object
             },
 
             /**
+             * (Optional)
+             *
              * The timeout for the elasticsearch query in milliseconds.
+             *
+             * @type {Number}
+             * @default 60000
              */
             timeout: {
                 type: Number,
@@ -171,7 +238,12 @@ Example:
             },
 
             /**
-             * elastic search JSON results available after a successful query.
+             * (Output)
+             *
+             * Elasticsearch JSON results available after a successful query.
+             *
+             * @type {Object}
+             * @default null
              */
             results: {
                 type: Object,
@@ -180,15 +252,27 @@ Example:
                 value: null
             },
 
+            /**
+             * (Output)
+             *
+             * The number of hits in the results.
+             *
+             * @type {Number}
+             */
             resultCount: {
                 type: Number,
                 readOnly: true,
                 notify: true,
-                computed: 'resolveResultCount(results)'
+                computed: '_resolveResultCount(results)'
             },
 
             /**
-             * either null or an error object that was returned from elastic search server.
+             * (Output)
+             *
+             * Either null or an error object that was returned from elastic search server.
+             *
+             * @type {Object}
+             * @default null
              */
             lastError: {
                 type: Object,
@@ -198,7 +282,12 @@ Example:
             },
 
             /**
-             *  indicate that search is in progress.
+             * (Output)
+             *
+             * Indicates that a search is in progress.
+             *
+             * @type {Boolean}
+             * @default false
              */
             loading: {
                 type: Boolean,
@@ -207,13 +296,23 @@ Example:
                 readOnly: true
             },
 
+            /**
+             * (Output)
+             *
+             * The elasticjs filter object created from the input array of filters.
+             *
+             * @type {Object}
+             */
             activeFilter: {
                 type: Object
             },
 
             /**
-             * Read-only object containing request body built by
-             * elastic-client-search and sent to elasticsearch.
+             * (Output)
+             *
+             * Read-only object containing request body built by elastic-client-search and sent to elasticsearch.
+             *
+             * @type {Object}
              */
             requestAsJson: {
                 type: Object,
@@ -222,8 +321,12 @@ Example:
             },
 
             /**
+             * (Optional)
+             *
              * Whether or not all applicable properties are ready for an elasticsearch request to be created.
-             * Defaults to true.
+             *
+             * @type {Boolean}
+             * @default true
              */
             propertiesReady: {
                 type: Boolean,
@@ -232,8 +335,12 @@ Example:
             },
 
             /**
-             * Whether or not _source object comes back with elasticsearch results. Defaults to true. If false,
-             * sourceInclude and sourceExclude fields will be ignored.
+             * (Optional)
+             *
+             * Whether or not _source object comes back with elasticsearch results. Defaults to true. If false, sourceInclude and sourceExclude fields will be ignored.
+             *
+             * @type {Boolean}
+             * @default true
              */
             sourceEnabled: {
                 type: Boolean,
@@ -242,11 +349,15 @@ Example:
             },
 
             /**
-             * Specify which parts from _source object to return from elasticsearch. Ignored if sourceEnabled
-             * is false.
+             * (Optional)
+             *
+             * Specify which parts from _source object to return from elasticsearch. Ignored if sourceEnabled is false.
              * Note: if only sourceInclude is specified, all other parts of _source will be excluded automatically.
              * See more about source filtering here:
              * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html
+             *
+             * @type {Array}
+             * @default []
              */
             sourceInclude: {
                 type: Array,
@@ -257,11 +368,15 @@ Example:
             },
 
             /**
-             * Specify which parts from _source object to omit from results returned. Ignored if sourceEnabled
-             * is false.
+             * (Optional)
+             *
+             * Specify which parts from _source object to omit from results returned. Ignored if sourceEnabled is false.
              * Note: if only sourceExclude is specified, all other parts of _source will be included automatically.
              * See more about source filtering here:
              * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html
+             *
+             * @type {Array}
+             * @default []
              */
             sourceExclude: {
                 type: Array,
@@ -270,7 +385,6 @@ Example:
                     return [];
                 }
             }
-
         },
 
         observers: [
@@ -280,15 +394,15 @@ Example:
 
         /**
          * Reset page to 1.
+         *
+         * @private
          */
         _resetPage: function() {
             this.page = 1;
         },
 
         /**
-         * Performs a server request via the elasticsearch client; invoked whenevery this.query is changed.
-         *
-         * @return {ElasticSearchResults}
+         * Performs a server request via the elasticsearch client using the body property.
          */
         basicSearch: function() {
             if(this.loading || !this.body) {
@@ -319,6 +433,9 @@ Example:
             });
         },
 
+        /**
+         * Performs a server request via the elasticsearch client using all properties except the body.
+         */
         search: function() {
             if(this.loading) {
               return;
@@ -369,7 +486,7 @@ Example:
 
             var filterArray = (this.filters ? ((this.filters.constructor === Array) ? this.filters : [this.filters]) : []);
             if(filterArray.length) {
-                this.activeFilter = this.buildFilter(filterArray);
+                this.activeFilter = this._buildFilter(filterArray);
                 request.filter(this.activeFilter);
             }
 
@@ -381,7 +498,7 @@ Example:
 
             var aggregationArray = (this.aggregations ? ((this.aggregations.constructor === Array) ? this.aggregations : [this.aggregations]) : []);
             _.each(aggregationArray, function(aggregation) {
-                request.agg(me.applyAggregationFilter(aggregation));
+                request.agg(me._buildAggregationFilter(aggregation));
             });
 
             if(this.highlight) {
@@ -401,7 +518,14 @@ Example:
             return request;
         },
 
-        resolveResultCount: function(results) {
+        /**
+         * Returns the number of hits in the given elasticsearch results object.
+         *
+         * @param {Object} results
+         * @return {Number}
+         * @private
+         */
+        _resolveResultCount: function(results) {
             if(results && results.hits && results.hits.total !== undefined) {
                 return results.hits.total;
             } else if(results && results.hits && results.hits.hits) {
@@ -411,17 +535,32 @@ Example:
             }
         },
 
-        applyAggregationFilter: function(agg) {
-            var aggName = Object.keys(agg.toJSON())[0];
+        /**
+         * Creates and returns the elasticjs aggregation filter object using the given array of elasticjs aggregation objects.
+         *
+         * @param {Array} aggregations
+         * @return {Object}
+         * @private
+         */
+        _buildAggregationFilter: function(aggregations) {
+            var aggName = Object.keys(aggregations.toJSON())[0];
 
-            //apply all filters except any matching this agg name
+            // Include all filters except any matching the name of this aggregation.
             var filterArray = (this.filters ? ((this.filters.constructor === Array) ? this.filters : [this.filters]) : []);
-            var filter = this.buildFilter(filterArray, aggName);
-            var filteredAgg = ejs.FilterAggregation(aggName).filter(filter).agg(agg);
+            var filter = this._buildFilter(filterArray, aggName);
+            var filteredAgg = ejs.FilterAggregation(aggName).filter(filter).agg(aggregations);
             return filteredAgg;
         },
 
-        buildFilter: function(filters, excludeName) {
+        /**
+         * Creates and returns the elasticjs filter object using the given array of elasticjs filter objects and optionally the name of a filter object to exclude.
+         *
+         * @param {Array} filters
+         * @param {String} excludeName
+         * @return {Object}
+         * @private
+         */
+        _buildFilter: function(filters, excludeName) {
             if(!excludeName) {
                 return ejs.AndFilter(filters);
             }
