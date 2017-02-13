@@ -1,8 +1,10 @@
 {
   "name": "elastic-client-search",
   "description": "A Polymer Element which provides a web component interface to the elasticsearch client search API, and coordinates building and issuing queries using the elastic.js library.",
-  "version": "1.0.17",
-  "authors": ["Next Century"],
+  "version": "1.0.18",
+  "authors": [
+    "Next Century"
+  ],
   "license": "Apache-2.0",
   "keywords": [
     "web-component",
@@ -12,7 +14,6 @@
     "elastic.js"
   ],
   "main": "elastic-client-search.html",
-  "license": "http://polymer.github.io/LICENSE.txt",
   "homepage": "https://github.com/DigElements/elastic-client-search/",
   "ignore": [
     "/.*",
@@ -22,8 +23,8 @@
     "polymer": "Polymer/polymer#^1.7.0",
     "elastic-client": "DigElements/elastic-client#^1.0.3",
     "elasticsearch": "^11.0.1",
-    "elastic.js": "DigElements/elastic.js#6639a1030eb071fb762bcdd742fdbf037fb57b24",
-    "lodash": "~4.17.2"
+    "elasticjs-import": "DigElements/elasticjs-import#~1.0.0",
+    "lodash-import": "DigElements/lodash-import#~1.0.0"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.1.7",
