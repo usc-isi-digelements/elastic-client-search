@@ -315,17 +315,6 @@ elasticsearch REST API.
             /**
              * (Output)
              *
-             * The elasticjs filter object created from the input array of filters.
-             *
-             * @type {Object}
-             */
-            activeFilter: {
-                type: Object
-            },
-
-            /**
-             * (Output)
-             *
              * Read-only object containing request body built by elastic-client-search and sent to elasticsearch.
              *
              * @type {Object}
@@ -400,22 +389,24 @@ elasticsearch REST API.
                 value: function() {
                     return [];
                 }
+            },
+
+            /**
+             * The elasticjs filter object created from the input array of filters.
+             *
+             * @type {Object}
+             * @private
+             */
+            _activeFilter: {
+                type: Object
             }
+
         },
 
         observers: [
             'basicSearch(body, index, client)',
             'search(propertiesReady, client, elasticTypes, index, query, filters, aggregations, page, sort, sortOrder, sortField, sourceEnabled, sourceInclude, sourceExclude)'
         ],
-
-        /**
-         * Reset page to 1.
-         *
-         * @private
-         */
-        _resetPage: function() {
-            this.page = 1;
-        },
 
         /**
          * Performs a server request via the elasticsearch client using the body property.
@@ -473,7 +464,7 @@ elasticsearch REST API.
                 type: this.elasticTypes,
                 size: this.pageSize,
                 from: this.pageSize * (this.page - 1),
-                body: this.buildRequest()
+                body: this._buildRequest()
             })
             .then(function(results) {
                 me._setLoading(false);
@@ -489,8 +480,9 @@ elasticsearch REST API.
          * Builds an ejs.Request() object based on various inputs.
          *
          * @return {ElasticSearchRequest}
+         * @private
          */
-        buildRequest: function() {
+        _buildRequest: function() {
             var me = this;
             var request = ejs.Request();
 
@@ -502,8 +494,8 @@ elasticsearch REST API.
 
             var filterArray = (this.filters ? ((this.filters.constructor === Array) ? this.filters : [this.filters]) : []);
             if(filterArray.length) {
-                this.activeFilter = this._buildFilter(filterArray);
-                request.filter(this.activeFilter);
+                this._activeFilter = this._buildFilter(filterArray);
+                request.filter(this._activeFilter);
             }
 
             if(this.sort && !_.isEmpty(this.sort)) {
@@ -532,6 +524,15 @@ elasticsearch REST API.
             // for general idea
             this._setRequestAsJson(request.toJSON());
             return request;
+        },
+
+        /**
+         * Reset page to 1.
+         *
+         * @private
+         */
+        _resetPage: function() {
+            this.page = 1;
         },
 
         /**
