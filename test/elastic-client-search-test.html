@@ -184,7 +184,7 @@ limitations under the License.
 
             es.aggregations = [ejs.MaxAggregation('maxAge').field('age')];
             es.filters = [];
-            es.query = null;
+            es.query = ejs.MatchAllQuery();
         });
 
         test('build and submit filter', function (done) {
@@ -200,7 +200,7 @@ limitations under the License.
 
             es.aggregations = [];
             es.filters = [ejs.TermFilter('age', '25')];
-            es.query = null;
+            es.query = ejs.MatchAllQuery();
         });
 
         test('query not set', function(done) {
@@ -357,6 +357,16 @@ limitations under the License.
 
         test('does not have html content', function() {
           assert.equal(Polymer.dom(es.root).children.length, 0);
+        });
+
+        test('does reset error and results but does not run search if query is null', function() {
+          es.aggregations = [];
+          es.filters = [];
+          es.lastError = 'error';
+          es.results = 'results';
+          es.query = null;
+          expect(es.lastError).to.be.null;
+          expect(es.results).to.be.null;
         });
       });
     </script>

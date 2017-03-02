@@ -444,19 +444,20 @@ elasticsearch REST API.
          * Performs a server request via the elasticsearch client using all properties except the body.
          */
         search: function() {
-            if(this.loading) {
+            if(this.loading || !this.propertiesReady) {
               return;
             }
-
-            if(!this.propertiesReady) {
-                return;
-            }
-
-            var me = this;
 
             // Set 'last-error' and 'results' before 'loading' because we want other components to update their error and results but may not do so if 'loading' is true.
             this._setLastError(null);
             this._setResults(null);
+
+            // If the query is empty, return after the error and results have been reset.
+            if(!this.query) {
+              return;
+            }
+
+            var me = this;
             this._setLoading(true);
             this.client.search({
                 requestTimeout: this.timeout,
