@@ -137,70 +137,70 @@ limitations under the License.
         });
 
         test('submits body', function (done) {
-            es.addEventListener('results-changed', function (event) {
-              assert.isTrue(es.resultCount > 0);
-              expect(es.results).to.be.an('object');
-              expect(es.results).to.not.be.empty;
-              expect(es.results).to.include.keys('hits');
-              assert.isNull(es.lastError);
-              assert.equal(es.results.hits.hits[0]._type, 'ad');
-              done();
-            });
-            es.body = body;
+          es.addEventListener('results-changed', function (event) {
+            assert.isTrue(es.resultCount > 0);
+            expect(es.results).to.be.an('object');
+            expect(es.results).to.not.be.empty;
+            expect(es.results).to.include.keys('hits');
+            assert.isNull(es.lastError);
+            assert.equal(es.results.hits.hits[0]._type, 'ad');
+            done();
+          });
+          es.body = body;
         });
 
         // Note that filters, aggregations, and query all have to be set to something other than
         // undefined in order to trigger the search observer
         test('build and submit query', function (done) {
-            es.addEventListener('results-changed', function (event) {
-              assert.isTrue(es.resultCount > 0);
-              expect(es.results).to.be.an('object');
-              expect(es.results).to.not.be.empty;
-              expect(es.results).to.include.keys('hits');
-              assert.isNull(es.lastError);
-              assert.equal(es.results.hits.hits[0]._type, 'ad');
-              assert.equal(es.results.hits.hits.length, 25);
-              expect(es.results.hits.total).to.be.at.least(30);
-              expect(es.results.hits.hits[0]._source.title.toLowerCase()).to.contain('ahab');
-              done();
-            });
+          es.addEventListener('results-changed', function (event) {
+            assert.isTrue(es.resultCount > 0);
+            expect(es.results).to.be.an('object');
+            expect(es.results).to.not.be.empty;
+            expect(es.results).to.include.keys('hits');
+            assert.isNull(es.lastError);
+            assert.equal(es.results.hits.hits[0]._type, 'ad');
+            assert.equal(es.results.hits.hits.length, 25);
+            expect(es.results.hits.total).to.be.at.least(30);
+            expect(es.results.hits.hits[0]._source.title.toLowerCase()).to.contain('ahab');
+            done();
+          });
 
-            es.aggregations = [];
-            es.filters = [];
-            es.query = ejs.MatchQuery('title', 'ahab');
+          es.aggregations = [];
+          es.filters = [];
+          es.query = ejs.MatchQuery('title', 'ahab');
         });
 
         test('build and submit aggregation', function (done) {
-            es.addEventListener('results-changed', function (event) {
-              assert.isTrue(es.resultCount > 0);
-              expect(es.results).to.be.an('object');
-              expect(es.results).to.not.be.empty;
-              expect(es.results).to.include.keys('hits');
-              assert.isNull(es.lastError);
-              expect(es.results).to.include.keys('aggregations');
-              expect(es.results.aggregations.maxAge.maxAge.value).to.equal(40);
-              done();
-            });
+          es.addEventListener('results-changed', function (event) {
+            assert.isTrue(es.resultCount > 0);
+            expect(es.results).to.be.an('object');
+            expect(es.results).to.not.be.empty;
+            expect(es.results).to.include.keys('hits');
+            assert.isNull(es.lastError);
+            expect(es.results).to.include.keys('aggregations');
+            expect(es.results.aggregations.maxAge.maxAge.value).to.equal(40);
+            done();
+          });
 
-            es.aggregations = [ejs.MaxAggregation('maxAge').field('age')];
-            es.filters = [];
-            es.query = ejs.MatchAllQuery();
+          es.aggregations = [ejs.MaxAggregation('maxAge').field('age')];
+          es.filters = [];
+          es.query = ejs.MatchAllQuery();
         });
 
         test('build and submit filter', function (done) {
-            es.addEventListener('results-changed', function (event) {
-              assert.isTrue(es.resultCount > 0);
-              expect(es.results).to.be.an('object');
-              expect(es.results).to.not.be.empty;
-              expect(es.results).to.include.keys('hits');
-              assert.isNull(es.lastError);
-              expect(es.results.hits.hits[0]._source.age).to.equal(25);
-              done();
-            });
+          es.addEventListener('results-changed', function (event) {
+            assert.isTrue(es.resultCount > 0);
+            expect(es.results).to.be.an('object');
+            expect(es.results).to.not.be.empty;
+            expect(es.results).to.include.keys('hits');
+            assert.isNull(es.lastError);
+            expect(es.results.hits.hits[0]._source.age).to.equal(25);
+            done();
+          });
 
-            es.aggregations = [];
-            es.filters = [ejs.TermFilter('age', '25')];
-            es.query = ejs.MatchAllQuery();
+          es.aggregations = [];
+          es.filters = [ejs.TermFilter('age', '25')];
+          es.query = ejs.MatchAllQuery();
         });
 
         test('query not set', function(done) {
@@ -208,12 +208,12 @@ limitations under the License.
         });
 
         test('when a search fails', function (done) {
-            esBad.addEventListener('last-error-changed', function (event) {
-              expect(esBad.results).to.be.null;
-              expect(esBad.lastError).to.exist;
-              done();
-            });
-            esBad.body = body;
+          esBad.addEventListener('last-error-changed', function (event) {
+            expect(esBad.results).to.be.null;
+            expect(esBad.lastError).to.exist;
+            done();
+          });
+          esBad.body = body;
         });
 
         test('_resetPage resets page to 1', function() {

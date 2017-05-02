@@ -54,542 +54,542 @@ elasticsearch REST API.
 -->
 
 <script>
-    Polymer({
-        /* globals _, ejs*/
-        is: 'elastic-client-search',
+  Polymer({
+    /* globals _, ejs*/
+    is: 'elastic-client-search',
 
-        properties: {
-            /**
-             * (Required)
-             *
-             * An instance of elasticsearch.Client which is connected to an elasticsearch server.
-             *
-             * @type {Object}
-             */
-            client: {
-                type: Object
-            },
+    properties: {
+      /**
+       * (Required)
+       *
+       * An instance of elasticsearch.Client which is connected to an elasticsearch server.
+       *
+       * @type {Object}
+       */
+      client: {
+        type: Object
+      },
 
-            /**
-             * (Required)
-             *
-             * The elastic index (database name).
-             *
-             * @type {String}
-             */
-            index: {
-                type: String
-            },
+      /**
+       * (Required)
+       *
+       * The elastic index (database name).
+       *
+       * @type {String}
+       */
+      index: {
+        type: String
+      },
 
-            /**
-             * (Optional)
-             *
-             * The elastic type (all types if empty array).
-             *
-             * @type {Array}
-             * @default []
-             */
-            elasticTypes: {
-                type: Array,
-                value: []
-            },
+      /**
+       * (Optional)
+       *
+       * The elastic type (all types if empty array).
+       *
+       * @type {Array}
+       * @default []
+       */
+      elasticTypes: {
+        type: Array,
+        value: []
+      },
 
-            /**
-             * (Required)
-             *
-             * A fully specified elastic query.  Use this if you do not want the query body to be built by this element.  (See https://www.elastic.co for search API.)
-             *
-             * @type {Object}
-             */
-            body: {
-                type: Object,
-                notify: true
-            },
+      /**
+       * (Required)
+       *
+       * A fully specified elastic query.  Use this if you do not want the query body to be built by this element.  (See https://www.elastic.co for search API.)
+       *
+       * @type {Object}
+       */
+      body: {
+        type: Object,
+        notify: true
+      },
 
-            /**
-             * (Required)
-             *
-             * The elasticsearch query that should be invoked.
-             *
-             * @type {Object}
-             */
-            query: {
-                type: Object,
-                notify: true,
-                observer: '_resetPage'
-            },
+      /**
+       * (Required)
+       *
+       * The elasticsearch query that should be invoked.
+       *
+       * @type {Object}
+       */
+      query: {
+        type: Object,
+        notify: true,
+        observer: '_resetPage'
+      },
 
-            /**
-             * (Optional)
-             *
-             * An ejs.Sort() object to add to the request.
-             *
-             * @type {Object}
-             * @default {}
-             */
-            sort: {
-                type: Object,
-                value: function() {
-                    return {};
-                },
-                notify: true
-            },
-
-            /**
-             * (Optional)
-             *
-             * The field on which to sort.  Must also define sortOrder.  Overridden by defining sort.
-             *
-             * @type {String}
-             * @default ''
-             */
-            sortField: {
-                type: String,
-                value: ''
-            },
-
-            /**
-             * (Optional)
-             *
-             * The order on which to sort.  Must also define sortField.  Overridden by defining sort.
-             *
-             * @type {String}
-             * @default ''
-             */
-            sortOrder: {
-                type: String,
-                value: ''
-            },
-
-            /**
-             * (Optional|Output)
-             *
-             * The number of the current page of search results.
-             *
-             * @type {Number}
-             * @default 1
-             */
-            page: {
-                type: Number,
-                value: 1,
-                notify: true
-            },
-
-            /**
-             * (Optional)
-             *
-             * The size of each page of search results.
-             *
-             * @type {Number}
-             * @default 25
-             */
-            pageSize: {
-                type: Number,
-                value: 25,
-                notify: true,
-                observer: '_resetPage'
-            },
-
-            /**
-             * (Optional)
-             *
-             * The number of pages of search results.
-             *
-             * @type {Number}
-             * @default 1
-             */
-            pageCount: {
-                type: Number,
-                value: 1,
-                notify: true
-            },
-
-            /**
-             * (Required)
-             *
-             * An elasticjs filter object or array of elasticjs filter objects.  This property must be defined for searches using the query property.
-             *
-             * @type {Array}
-             */
-            filters: {
-                type: Array,
-                notify: true,
-                observer: '_resetPage'
-            },
-
-            /**
-             * (Required)
-             *
-             * An elasticjs aggregation filter object or array of elasticjs aggregation filter objects.  This property must be defined for searches using the query property.
-             *
-             * @type {Array}
-             */
-            aggregations: {
-                type: Array,
-                notify: true
-            },
-
-            /**
-             * (Optional)
-             *
-             * An elasticjs highlight object.
-             *
-             * @type {Object}
-             */
-            highlight: {
-                type: Object
-            },
-
-            /**
-             * (Optional)
-             *
-             * The timeout for the elasticsearch query in milliseconds.
-             *
-             * @type {Number}
-             * @default 60000
-             */
-            timeout: {
-                type: Number,
-                value: 60000
-            },
-
-            /**
-             * (Output)
-             *
-             * Elasticsearch JSON results available after a successful query.
-             *
-             * @type {Object}
-             * @default null
-             */
-            results: {
-                type: Object,
-                notify: true,
-                readOnly: true,
-                value: null
-            },
-
-            /**
-             * (Output)
-             *
-             * The number of hits in the results.
-             *
-             * @type {Number}
-             */
-            resultCount: {
-                type: Number,
-                readOnly: true,
-                notify: true,
-                computed: '_resolveResultCount(results)'
-            },
-
-            /**
-             * (Output)
-             *
-             * Either null or an error object that was returned from elastic search server.
-             *
-             * @type {Object}
-             * @default null
-             */
-            lastError: {
-                type: Object,
-                value: null,
-                notify: true,
-                readOnly: true
-            },
-
-            /**
-             * (Output)
-             *
-             * Indicates that a search is in progress.
-             *
-             * @type {Boolean}
-             * @default false
-             */
-            loading: {
-                type: Boolean,
-                value: false,
-                notify: true,
-                readOnly: true
-            },
-
-            /**
-             * (Output)
-             *
-             * Read-only object containing request body built by elastic-client-search and sent to elasticsearch.
-             *
-             * @type {Object}
-             */
-            requestAsJson: {
-                type: Object,
-                readOnly: true,
-                notify: true
-            },
-
-            /**
-             * (Optional)
-             *
-             * Whether or not all applicable properties are ready for an elasticsearch request to be created.
-             *
-             * @type {Boolean}
-             * @default true
-             */
-            propertiesReady: {
-                type: Boolean,
-                notify: true,
-                value: true
-            },
-
-            /**
-             * (Optional)
-             *
-             * Whether or not _source object comes back with elasticsearch results. Defaults to true. If false, sourceInclude and sourceExclude fields will be ignored.
-             *
-             * @type {Boolean}
-             * @default true
-             */
-            sourceEnabled: {
-                type: Boolean,
-                notify: true,
-                value: true
-            },
-
-            /**
-             * (Optional)
-             *
-             * Specify which parts from _source object to return from elasticsearch. Ignored if sourceEnabled is false.
-             * Note: if only sourceInclude is specified, all other parts of _source will be excluded automatically.
-             * See more about source filtering here:
-             * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html
-             *
-             * @type {Array}
-             * @default []
-             */
-            sourceInclude: {
-                type: Array,
-                notify: true,
-                value: function() {
-                    return [];
-                }
-            },
-
-            /**
-             * (Optional)
-             *
-             * Specify which parts from _source object to omit from results returned. Ignored if sourceEnabled is false.
-             * Note: if only sourceExclude is specified, all other parts of _source will be included automatically.
-             * See more about source filtering here:
-             * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html
-             *
-             * @type {Array}
-             * @default []
-             */
-            sourceExclude: {
-                type: Array,
-                notify: true,
-                value: function() {
-                    return [];
-                }
-            },
-
-            /**
-             * The elasticjs filter object created from the input array of filters.
-             *
-             * @type {Object}
-             * @private
-             */
-            _activeFilter: {
-                type: Object
-            }
-
+      /**
+       * (Optional)
+       *
+       * An ejs.Sort() object to add to the request.
+       *
+       * @type {Object}
+       * @default {}
+       */
+      sort: {
+        type: Object,
+        value: function() {
+          return {};
         },
+        notify: true
+      },
 
-        observers: [
-            'basicSearch(body, index, client)',
-            'search(propertiesReady, client, elasticTypes, index, query, filters, aggregations, page, sort, sortOrder, sortField, sourceEnabled, sourceInclude, sourceExclude)'
-        ],
+      /**
+       * (Optional)
+       *
+       * The field on which to sort.  Must also define sortOrder.  Overridden by defining sort.
+       *
+       * @type {String}
+       * @default ''
+       */
+      sortField: {
+        type: String,
+        value: ''
+      },
 
-        /**
-         * Performs a server request via the elasticsearch client using the body property.
-         */
-        basicSearch: function() {
-            if(this.loading || !this.body) {
-                return;
-            }
+      /**
+       * (Optional)
+       *
+       * The order on which to sort.  Must also define sortField.  Overridden by defining sort.
+       *
+       * @type {String}
+       * @default ''
+       */
+      sortOrder: {
+        type: String,
+        value: ''
+      },
 
-            var me = this;
+      /**
+       * (Optional|Output)
+       *
+       * The number of the current page of search results.
+       *
+       * @type {Number}
+       * @default 1
+       */
+      page: {
+        type: Number,
+        value: 1,
+        notify: true
+      },
 
-            // Set 'last-error' and 'results' before 'loading' because we want other components to update their error and results but may not do so if 'loading' is true.
-            this._setLastError(null);
-            this._setResults(null);
-            this._setLoading(true);
-            this.client.search({
-                requestTimeout: this.timeout,
-                index: this.index,
-                type: this.elasticTypes,
-                body: this.body,
-                size: this.pageSize,
-                from: this.pageSize * (this.page - 1)
-            })
-            .then(function(results) {
-                me._setLoading(false);
-                me._setResults(results);
-            })
-            .catch(function(err) {
-                me._setLoading(false);
-                me._setLastError(err);
-            });
-        },
+      /**
+       * (Optional)
+       *
+       * The size of each page of search results.
+       *
+       * @type {Number}
+       * @default 25
+       */
+      pageSize: {
+        type: Number,
+        value: 25,
+        notify: true,
+        observer: '_resetPage'
+      },
 
-        /**
-         * Performs a server request via the elasticsearch client using all properties except the body.
-         */
-        search: function() {
-            if(this.loading || !this.propertiesReady) {
-              return;
-            }
+      /**
+       * (Optional)
+       *
+       * The number of pages of search results.
+       *
+       * @type {Number}
+       * @default 1
+       */
+      pageCount: {
+        type: Number,
+        value: 1,
+        notify: true
+      },
 
-            // Set 'last-error' and 'results' before 'loading' because we want other components to update their error and results but may not do so if 'loading' is true.
-            this._setLastError(null);
-            this._setResults(null);
+      /**
+       * (Required)
+       *
+       * An elasticjs filter object or array of elasticjs filter objects.  This property must be defined for searches using the query property.
+       *
+       * @type {Array}
+       */
+      filters: {
+        type: Array,
+        notify: true,
+        observer: '_resetPage'
+      },
 
-            // If the query is empty, return after the error and results have been reset.
-            if(!this.query) {
-              return;
-            }
+      /**
+       * (Required)
+       *
+       * An elasticjs aggregation filter object or array of elasticjs aggregation filter objects.  This property must be defined for searches using the query property.
+       *
+       * @type {Array}
+       */
+      aggregations: {
+        type: Array,
+        notify: true
+      },
 
-            var me = this;
-            this._setLoading(true);
-            this.client.search({
-                requestTimeout: this.timeout,
-                index: this.index,
-                type: this.elasticTypes,
-                size: this.pageSize,
-                from: this.pageSize * (this.page - 1),
-                body: this._buildRequest()
-            })
-            .then(function(results) {
-                me._setLoading(false);
-                me._setResults(results);
-            })
-            .catch(function(err) {
-                me._setLoading(false);
-                me._setLastError(err);
-            });
-        },
+      /**
+       * (Optional)
+       *
+       * An elasticjs highlight object.
+       *
+       * @type {Object}
+       */
+      highlight: {
+        type: Object
+      },
 
-        /**
-         * Builds an ejs.Request() object based on various inputs.
-         *
-         * @return {ElasticSearchRequest}
-         * @private
-         */
-        _buildRequest: function() {
-            var me = this;
-            var request = ejs.Request();
+      /**
+       * (Optional)
+       *
+       * The timeout for the elasticsearch query in milliseconds.
+       *
+       * @type {Number}
+       * @default 60000
+       */
+      timeout: {
+        type: Number,
+        value: 60000
+      },
 
-            if (this.query) {
-                request.query(this.query);
-            } else {
-                request.query(ejs.MatchAllQuery());
-            }
+      /**
+       * (Output)
+       *
+       * Elasticsearch JSON results available after a successful query.
+       *
+       * @type {Object}
+       * @default null
+       */
+      results: {
+        type: Object,
+        notify: true,
+        readOnly: true,
+        value: null
+      },
 
-            var filterArray = (this.filters ? ((this.filters.constructor === Array) ? this.filters : [this.filters]) : []);
-            if(filterArray.length) {
-                this._activeFilter = this._buildFilter(filterArray);
-                request.filter(this._activeFilter);
-            }
+      /**
+       * (Output)
+       *
+       * The number of hits in the results.
+       *
+       * @type {Number}
+       */
+      resultCount: {
+        type: Number,
+        readOnly: true,
+        notify: true,
+        computed: '_resolveResultCount(results)'
+      },
 
-            if(this.sort && !_.isEmpty(this.sort)) {
-                request.sort(this.sort);
-            } else if(this.sortField && this.sortOrder) {
-                request.sort(ejs.Sort(this.sortField).order(this.sortOrder));
-            }
+      /**
+       * (Output)
+       *
+       * Either null or an error object that was returned from elastic search server.
+       *
+       * @type {Object}
+       * @default null
+       */
+      lastError: {
+        type: Object,
+        value: null,
+        notify: true,
+        readOnly: true
+      },
 
-            var aggregationArray = (this.aggregations ? ((this.aggregations.constructor === Array) ? this.aggregations : [this.aggregations]) : []);
-            _.each(aggregationArray, function(aggregation) {
-                request.agg(me._buildAggregationFilter(aggregation));
-            });
+      /**
+       * (Output)
+       *
+       * Indicates that a search is in progress.
+       *
+       * @type {Boolean}
+       * @default false
+       */
+      loading: {
+        type: Boolean,
+        value: false,
+        notify: true,
+        readOnly: true
+      },
 
-            if(this.highlight) {
-                request.highlight(this.highlight);
-            }
+      /**
+       * (Output)
+       *
+       * Read-only object containing request body built by elastic-client-search and sent to elasticsearch.
+       *
+       * @type {Object}
+       */
+      requestAsJson: {
+        type: Object,
+        readOnly: true,
+        notify: true
+      },
 
-            if(!this.sourceEnabled) {
-                request.source(false);
-            } else if(this.sourceInclude.length > 0 || this.sourceExclude.length > 0) {
-                request.source(this.sourceInclude, this.sourceExclude);
-            }
+      /**
+       * (Optional)
+       *
+       * Whether or not all applicable properties are ready for an elasticsearch request to be created.
+       *
+       * @type {Boolean}
+       * @default true
+       */
+      propertiesReady: {
+        type: Boolean,
+        notify: true,
+        value: true
+      },
 
-            // TODO: add logic to build entire request from properties.
-            // see: https://github.com/YousefED/ElasticUI/src/controllers/IndexController.ts
-            // for general idea
-            this._setRequestAsJson(request.toJSON());
-            return request;
-        },
+      /**
+       * (Optional)
+       *
+       * Whether or not _source object comes back with elasticsearch results. Defaults to true. If false, sourceInclude and sourceExclude fields will be ignored.
+       *
+       * @type {Boolean}
+       * @default true
+       */
+      sourceEnabled: {
+        type: Boolean,
+        notify: true,
+        value: true
+      },
 
-        /**
-         * Reset page to 1.
-         *
-         * @private
-         */
-        _resetPage: function() {
-            this.page = 1;
-        },
-
-        /**
-         * Returns the number of hits in the given elasticsearch results object.
-         *
-         * @param {Object} results
-         * @return {Number}
-         * @private
-         */
-        _resolveResultCount: function(results) {
-            if(results && results.hits && results.hits.total !== undefined) {
-                return results.hits.total;
-            } else if(results && results.hits && results.hits.hits) {
-                return results.hits.hits;
-            } else {
-                return 0;
-            }
-        },
-
-        /**
-         * Creates and returns the elasticjs aggregation filter object using the given array of elasticjs aggregation objects.
-         *
-         * @param {Array} aggregations
-         * @return {Object}
-         * @private
-         */
-        _buildAggregationFilter: function(aggregations) {
-            var aggName = Object.keys(aggregations.toJSON())[0];
-
-            // Include all filters except any matching the name of this aggregation.
-            var filterArray = (this.filters ? ((this.filters.constructor === Array) ? this.filters : [this.filters]) : []);
-            var filter = this._buildFilter(filterArray, aggName);
-            var filteredAgg = ejs.FilterAggregation(aggName).filter(filter).agg(aggregations);
-            return filteredAgg;
-        },
-
-        /**
-         * Creates and returns the elasticjs filter object using the given array of elasticjs filter objects and optionally the name of a filter object to exclude.
-         *
-         * @param {Array} filters
-         * @param {String} excludeName
-         * @return {Object}
-         * @private
-         */
-        _buildFilter: function(filters, excludeName) {
-            if(!excludeName) {
-                return ejs.AndFilter(filters);
-            }
-
-            var remainingFilters = [];
-            _.each(filters, function(filter) {
-                if(!filter.name() || filter.name() !== excludeName) {
-                    remainingFilters.push(filter);
-                }
-            });
-            return ejs.AndFilter(remainingFilters);
+      /**
+       * (Optional)
+       *
+       * Specify which parts from _source object to return from elasticsearch. Ignored if sourceEnabled is false.
+       * Note: if only sourceInclude is specified, all other parts of _source will be excluded automatically.
+       * See more about source filtering here:
+       * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html
+       *
+       * @type {Array}
+       * @default []
+       */
+      sourceInclude: {
+        type: Array,
+        notify: true,
+        value: function() {
+          return [];
         }
-    });
+      },
+
+      /**
+       * (Optional)
+       *
+       * Specify which parts from _source object to omit from results returned. Ignored if sourceEnabled is false.
+       * Note: if only sourceExclude is specified, all other parts of _source will be included automatically.
+       * See more about source filtering here:
+       * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html
+       *
+       * @type {Array}
+       * @default []
+       */
+      sourceExclude: {
+        type: Array,
+        notify: true,
+        value: function() {
+          return [];
+        }
+      },
+
+      /**
+       * The elasticjs filter object created from the input array of filters.
+       *
+       * @type {Object}
+       * @private
+       */
+      _activeFilter: {
+        type: Object
+      }
+
+    },
+
+    observers: [
+      'basicSearch(body, index, client)',
+      'search(propertiesReady, client, elasticTypes, index, query, filters, aggregations, page, sort, sortOrder, sortField, sourceEnabled, sourceInclude, sourceExclude)'
+    ],
+
+    /**
+     * Performs a server request via the elasticsearch client using the body property.
+     */
+    basicSearch: function() {
+      if(this.loading || !this.body) {
+        return;
+      }
+
+      var me = this;
+
+      // Set 'last-error' and 'results' before 'loading' because we want other components to update their error and results but may not do so if 'loading' is true.
+      this._setLastError(null);
+      this._setResults(null);
+      this._setLoading(true);
+      this.client.search({
+        requestTimeout: this.timeout,
+        index: this.index,
+        type: this.elasticTypes,
+        body: this.body,
+        size: this.pageSize,
+        from: this.pageSize * (this.page - 1)
+      })
+      .then(function(results) {
+        me._setLoading(false);
+        me._setResults(results);
+      })
+      .catch(function(err) {
+        me._setLoading(false);
+        me._setLastError(err);
+      });
+    },
+
+    /**
+     * Performs a server request via the elasticsearch client using all properties except the body.
+     */
+    search: function() {
+      if(this.loading || !this.propertiesReady) {
+        return;
+      }
+
+      // Set 'last-error' and 'results' before 'loading' because we want other components to update their error and results but may not do so if 'loading' is true.
+      this._setLastError(null);
+      this._setResults(null);
+
+      // If the query is empty, return after the error and results have been reset.
+      if(!this.query) {
+        return;
+      }
+
+      var me = this;
+      this._setLoading(true);
+      this.client.search({
+        requestTimeout: this.timeout,
+        index: this.index,
+        type: this.elasticTypes,
+        size: this.pageSize,
+        from: this.pageSize * (this.page - 1),
+        body: this._buildRequest()
+      })
+      .then(function(results) {
+        me._setLoading(false);
+        me._setResults(results);
+      })
+      .catch(function(err) {
+        me._setLoading(false);
+        me._setLastError(err);
+      });
+    },
+
+    /**
+     * Builds an ejs.Request() object based on various inputs.
+     *
+     * @return {ElasticSearchRequest}
+     * @private
+     */
+    _buildRequest: function() {
+      var me = this;
+      var request = ejs.Request();
+
+      if (this.query) {
+        request.query(this.query);
+      } else {
+        request.query(ejs.MatchAllQuery());
+      }
+
+      var filterArray = (this.filters ? ((this.filters.constructor === Array) ? this.filters : [this.filters]) : []);
+      if(filterArray.length) {
+        this._activeFilter = this._buildFilter(filterArray);
+        request.filter(this._activeFilter);
+      }
+
+      if(this.sort && !_.isEmpty(this.sort)) {
+        request.sort(this.sort);
+      } else if(this.sortField && this.sortOrder) {
+        request.sort(ejs.Sort(this.sortField).order(this.sortOrder));
+      }
+
+      var aggregationArray = (this.aggregations ? ((this.aggregations.constructor === Array) ? this.aggregations : [this.aggregations]) : []);
+      _.each(aggregationArray, function(aggregation) {
+        request.agg(me._buildAggregationFilter(aggregation));
+      });
+
+      if(this.highlight) {
+        request.highlight(this.highlight);
+      }
+
+      if(!this.sourceEnabled) {
+        request.source(false);
+      } else if(this.sourceInclude.length > 0 || this.sourceExclude.length > 0) {
+        request.source(this.sourceInclude, this.sourceExclude);
+      }
+
+      // TODO: add logic to build entire request from properties.
+      // see: https://github.com/YousefED/ElasticUI/src/controllers/IndexController.ts
+      // for general idea
+      this._setRequestAsJson(request.toJSON());
+      return request;
+    },
+
+    /**
+     * Reset page to 1.
+     *
+     * @private
+     */
+    _resetPage: function() {
+      this.page = 1;
+    },
+
+    /**
+     * Returns the number of hits in the given elasticsearch results object.
+     *
+     * @param {Object} results
+     * @return {Number}
+     * @private
+     */
+    _resolveResultCount: function(results) {
+      if(results && results.hits && results.hits.total !== undefined) {
+        return results.hits.total;
+      } else if(results && results.hits && results.hits.hits) {
+        return results.hits.hits;
+      } else {
+        return 0;
+      }
+    },
+
+    /**
+     * Creates and returns the elasticjs aggregation filter object using the given array of elasticjs aggregation objects.
+     *
+     * @param {Array} aggregations
+     * @return {Object}
+     * @private
+     */
+    _buildAggregationFilter: function(aggregations) {
+      var aggName = Object.keys(aggregations.toJSON())[0];
+
+      // Include all filters except any matching the name of this aggregation.
+      var filterArray = (this.filters ? ((this.filters.constructor === Array) ? this.filters : [this.filters]) : []);
+      var filter = this._buildFilter(filterArray, aggName);
+      var filteredAgg = ejs.FilterAggregation(aggName).filter(filter).agg(aggregations);
+      return filteredAgg;
+    },
+
+    /**
+     * Creates and returns the elasticjs filter object using the given array of elasticjs filter objects and optionally the name of a filter object to exclude.
+     *
+     * @param {Array} filters
+     * @param {String} excludeName
+     * @return {Object}
+     * @private
+     */
+    _buildFilter: function(filters, excludeName) {
+      if(!excludeName) {
+        return ejs.AndFilter(filters);
+      }
+
+      var remainingFilters = [];
+      _.each(filters, function(filter) {
+        if(!filter.name() || filter.name() !== excludeName) {
+          remainingFilters.push(filter);
+        }
+      });
+      return ejs.AndFilter(remainingFilters);
+    }
+  });
 </script>
