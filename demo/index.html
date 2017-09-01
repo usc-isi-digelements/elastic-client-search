@@ -19,50 +19,55 @@ limitations under the License.
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <title>elastic-client-search Demo</title>
-    <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+    <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
     <link rel="import" href="../../elastic-client/elastic-client.html">
     <link rel="import" href="../elastic-client-search.html">
   </head>
   <body unresolved>
-    <template is="dom-bind" id="demo">
-      <elastic-client
-        config='{"host": "http://localhost:9200"}'
-        client="{{esclient}}"
-        cluster-status="{{myStatus}}">
-      </elastic-client>
+    <dom-bind>
+      <script>
+        (function(document) {
+          var domBind = document.querySelector('dom-bind');
 
-      <p>Cluster Status: {{myStatus}}</p>
+          domBind.stringify = function(data) {
+            return JSON.stringify(data);
+          };
+        })(document);
+      </script>
 
-      <elastic-client-search
-        client="[[esclient]]"
-        index="mockads"
-        type='["ad"]'
-        body='{"query": {"match_all": {}}}'
-        results="{{data}}"
-        last-error="{{error}}">
-      </elastic-client-search>
+      <template is="dom-bind" id="demo">
+        <elastic-client
+          config='{"host": "http://localhost:9200"}'
+          client="{{esclient}}"
+          cluster-status="{{myStatus}}">
+        </elastic-client>
 
-      <p>Host: http://localhost:9200</p>
-      <p>Types: ["ad"]</p>
-      <p>Index: mockads</p>
-      <p>Query Body: {"query": {"match_all": {}}}</p>
-      <p>Error (if any): {{stringify(error)}}</p>
+        <p>Cluster Status: {{myStatus}}</p>
 
-      <span>Results: {{data.hits.total}} (only showing first {{data.hits.hits.length}}):</span>
-      <ul>
-        <template is="dom-repeat" items="{{data.hits.hits}}" as="item">
-          <li>Title: {{item._source.title}}</li>
+        <template is="dom-if" if=[[esclient]]>
+          <elastic-client-search
+            client="[[esclient]]"
+            index="mockads"
+            type='["ad"]'
+            body='{"query": {"match_all": {}}}'
+            results="{{data}}"
+            last-error="{{error}}">
+          </elastic-client-search>
+          
+          <p>Host: http://localhost:9200</p>
+          <p>Types: ["ad"]</p>
+          <p>Index: mockads</p>
+          <p>Query Body: {"query": {"match_all": {}}}</p>
+          <p>Error (if any): {{stringify(error)}}</p>
+
+          <span>Results: {{data.hits.total}} (only showing first {{data.hits.hits.length}}):</span>
+          <ul>
+            <template is="dom-repeat" items="{{data.hits.hits}}" as="item">
+              <li>Title: {{item._source.title}}</li>
+            </template>
+          </ul>
         </template>
-      </ul>
-    </template>
-    <script>
-      (function(document) {
-        var demo = document.querySelector('#demo');
-
-        demo.stringify = function(data) {
-          return JSON.stringify(data);
-        };
-      })(document);
-    </script>
+      </template>
+    </dom-bind>
   </body>
 </html>
