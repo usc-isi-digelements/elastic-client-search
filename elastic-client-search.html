@@ -444,7 +444,7 @@ elasticsearch REST API.
      * Performs a server request via the elasticsearch client using all properties except the body.
      */
     search: function() {
-      if(this.loading || !this.propertiesReady || !this.client) {
+      if(this.loading || !this.propertiesReady || !this.client || !this.index) {
         return;
       }
 
@@ -452,8 +452,17 @@ elasticsearch REST API.
       this._setLastError(null);
       this._setResults(null);
 
-      // If the query is empty, return after the error and results have been reset.
-      if(!this.query) {
+      // If the query itself is empty or another search property is undefined, return after the error and results have been reset.
+      if(!this.query ||
+          this.filters === undefined ||
+          this.aggregations === undefined ||
+          this.page === undefined ||
+          this.sort === undefined ||
+          this.sortOrder === undefined ||
+          this.sortField === undefined ||
+          this.sourceEnabled === undefined ||
+          this.sourceInclude === undefined ||
+          this.sourceExclude === undefined) {
         return;
       }
 
