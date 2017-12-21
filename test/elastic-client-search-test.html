@@ -246,7 +246,7 @@ limitations under the License.
         test('_buildRequest returns request with specified filter value', function() {
           es.filters = [ejs.TermsFilter('city', 'New York City'), ejs.TermsFilter('city', 'Los Angeles')];
           var request = es._buildRequest();
-          var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).filter(ejs.AndFilter([ejs.TermsFilter('city', 'New York City'), ejs.TermsFilter('city', 'Los Angeles')]));
+          var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).filter(ejs.BoolFilter().must([ejs.TermsFilter('city', 'New York City'), ejs.TermsFilter('city', 'Los Angeles')]));
 
           assert.deepEqual(es.requestAsJson, expectedReqVals.toJSON());
           assert.deepEqual(es._activeFilter.toJSON(), expectedReqVals.toJSON().filter);
@@ -258,7 +258,7 @@ limitations under the License.
           es.aggregations = [ejs.TermsAggregation('cityAgg').field('city').size(10)];
           var request = es._buildRequest();
           var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).aggregation(
-            ejs.FilterAggregation('cityAgg').filter(ejs.AndFilter([])).agg(ejs.TermsAggregation('cityAgg').field('city').size(10)));
+            ejs.FilterAggregation('cityAgg').filter(ejs.BoolFilter()).agg(ejs.TermsAggregation('cityAgg').field('city').size(10)));
 
           assert.deepEqual(es.requestAsJson, expectedReqVals.toJSON());
           assert.deepEqual(request.toJSON().aggs, expectedReqVals.toJSON().aggs);

@@ -588,17 +588,21 @@ elasticsearch REST API.
      * @private
      */
     _buildFilter: function(filters, excludeName) {
-      if(!excludeName) {
-        return ejs.AndFilter(filters);
+      var includedFilters = excludeName ? [] : filters;
+      if(excludeName) {
+        filters.forEach(function(filter) {
+          if(!filter.name() || filter.name() !== excludeName) {
+            includedFilters.push(filter);
+          }
+        });
       }
 
-      var remainingFilters = [];
-      _.each(filters, function(filter) {
-        if(!filter.name() || filter.name() !== excludeName) {
-          remainingFilters.push(filter);
-        }
+      var boolFilter = ejs.BoolFilter();
+      includedFilters.forEach(function(filter) {
+        boolFilter.must(filter);
       });
-      return ejs.AndFilter(remainingFilters);
+
+      return boolFilter;
     }
   });
 </script>
