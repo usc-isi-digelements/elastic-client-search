@@ -75,8 +75,6 @@ limitations under the License.
           assert.isUndefined(es.query);
           assert.isUndefined(es.aggregations);
           assert.isUndefined(es.highlight);
-          assert.isUndefined(es.filters);
-          assert.isUndefined(es.activeFilter);
           assert.isUndefined(es.requestAsJson);
         });
 
@@ -149,7 +147,7 @@ limitations under the License.
           es.body = body;
         });
 
-        // Note that filters, aggregations, and query all have to be set to something other than
+        // Note that aggregations and query all have to be set to something other than
         // undefined in order to trigger the search observer
         test('build and submit query', function (done) {
           es.addEventListener('results-changed', function (event) {
@@ -166,7 +164,6 @@ limitations under the License.
           });
 
           es.aggregations = [];
-          es.filters = [];
           es.query = ejs.MatchQuery('title', 'ahab');
         });
 
@@ -178,28 +175,11 @@ limitations under the License.
             expect(es.results).to.include.keys('hits');
             assert.isNull(es.lastError);
             expect(es.results).to.include.keys('aggregations');
-            expect(es.results.aggregations.maxAge.maxAge.value).to.equal(40);
+            expect(es.results.aggregations.maxAge.value).to.equal(40);
             done();
           });
 
           es.aggregations = [ejs.MaxAggregation('maxAge').field('age')];
-          es.filters = [];
-          es.query = ejs.MatchAllQuery();
-        });
-
-        test('build and submit filter', function (done) {
-          es.addEventListener('results-changed', function (event) {
-            assert.isTrue(es.resultCount > 0);
-            expect(es.results).to.be.an('object');
-            expect(es.results).to.not.be.empty;
-            expect(es.results).to.include.keys('hits');
-            assert.isNull(es.lastError);
-            expect(es.results.hits.hits[0]._source.age).to.equal(25);
-            done();
-          });
-
-          es.aggregations = [];
-          es.filters = [ejs.TermFilter('age', '25')];
           es.query = ejs.MatchAllQuery();
         });
 
@@ -243,22 +223,10 @@ limitations under the License.
           assert.isNull(es.lastError);
         });
 
-        test('_buildRequest returns request with specified filter value', function() {
-          es.filters = [ejs.TermsFilter('city', 'New York City'), ejs.TermsFilter('city', 'Los Angeles')];
-          var request = es._buildRequest();
-          var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).filter(ejs.BoolFilter().must([ejs.TermsFilter('city', 'New York City'), ejs.TermsFilter('city', 'Los Angeles')]));
-
-          assert.deepEqual(es.requestAsJson, expectedReqVals.toJSON());
-          assert.deepEqual(es._activeFilter.toJSON(), expectedReqVals.toJSON().filter);
-          assert.deepEqual(request.toJSON().filter, expectedReqVals.toJSON().filter);
-          assert.isNull(es.lastError);
-        });
-
         test('_buildRequest returns request with specified aggregation value', function() {
           es.aggregations = [ejs.TermsAggregation('cityAgg').field('city').size(10)];
           var request = es._buildRequest();
-          var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).aggregation(
-            ejs.FilterAggregation('cityAgg').filter(ejs.BoolFilter()).agg(ejs.TermsAggregation('cityAgg').field('city').size(10)));
+          var expectedReqVals = ejs.Request().query(ejs.MatchAllQuery()).aggregation(ejs.TermsAggregation('cityAgg').field('city').size(10));
 
           assert.deepEqual(es.requestAsJson, expectedReqVals.toJSON());
           assert.deepEqual(request.toJSON().aggs, expectedReqVals.toJSON().aggs);
@@ -361,7 +329,6 @@ limitations under the License.
 
         test('does reset error and results but does not run search if query is null', function() {
           es.aggregations = [];
-          es.filters = [];
           es.lastError = 'error';
           es.results = 'results';
           es.query = null;

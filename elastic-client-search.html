@@ -22,7 +22,7 @@ limitations under the License.
 <!--
 A Polymer Element which provides a view of an Elasticsearch index, and coordinates
 building and issuing queries using the elastic.js library.  Satellite
-elements for query, filters, aggregation, sorting, and paging communicate
+elements for query, aggregations, sorting, and paging communicate
 with this element to make changes to the index object, and to receive
 results from queries that are issued to an elastic server instance.
 
@@ -42,7 +42,6 @@ elasticsearch REST API.
   index="[[myIndex]]"
   query="[[ejsQuery]]"
   aggregations="[]"
-  filters="[[ejsFilters]]"
   results="{{queryResults}}"
   result-count="{{resultCount}}"
   last-error="{{queryError}}"
@@ -207,20 +206,7 @@ elasticsearch REST API.
       /**
        * (Required)
        *
-       * An elasticjs filter object or array of elasticjs filter objects.  This property must be defined for searches using the query property.
-       *
-       * @type {Array}
-       */
-      filters: {
-        type: Array,
-        notify: true,
-        observer: '_resetPage'
-      },
-
-      /**
-       * (Required)
-       *
-       * An elasticjs aggregation filter object or array of elasticjs aggregation filter objects.  This property must be defined for searches using the query property.
+       * An elasticjs aggregation object or array of elasticjs aggregation objects.  This property must be defined for searches using the query property.
        *
        * @type {Array}
        */
@@ -389,23 +375,12 @@ elasticsearch REST API.
         value: function() {
           return [];
         }
-      },
-
-      /**
-       * The elasticjs filter object created from the input array of filters.
-       *
-       * @type {Object}
-       * @private
-       */
-      _activeFilter: {
-        type: Object
       }
-
     },
 
     observers: [
       'basicSearch(body, index, client)',
-      'search(propertiesReady, client, elasticTypes, index, query, filters, aggregations, page, sort, sortOrder, sortField, sourceEnabled, sourceInclude, sourceExclude)'
+      'search(propertiesReady, client, elasticTypes, index, query, aggregations, page, sort, sortOrder, sortField, sourceEnabled, sourceInclude, sourceExclude)'
     ],
 
     /**
@@ -454,7 +429,6 @@ elasticsearch REST API.
 
       // If the query itself is empty or another search property is undefined, return after the error and results have been reset.
       if(!this.query ||
-          this.filters === undefined ||
           this.aggregations === undefined ||
           this.page === undefined ||
           this.sort === undefined ||
@@ -496,17 +470,7 @@ elasticsearch REST API.
       var me = this;
       var request = ejs.Request();
 
-      if (this.query) {
-        request.query(this.query);
-      } else {
-        request.query(ejs.MatchAllQuery());
-      }
-
-      var filterArray = (this.filters ? ((this.filters.constructor === Array) ? this.filters : [this.filters]) : []);
-      if(filterArray.length) {
-        this._activeFilter = this._buildFilter(filterArray);
-        request.filter(this._activeFilter);
-      }
+      request.query(this.query || ejs.MatchAllQuery());
 
       if(this.sort && !_.isEmpty(this.sort)) {
         request.sort(this.sort);
@@ -514,10 +478,11 @@ elasticsearch REST API.
         request.sort(ejs.Sort(this.sortField).order(this.sortOrder));
       }
 
-      var aggregationArray = (this.aggregations ? ((this.aggregations.constructor === Array) ? this.aggregations : [this.aggregations]) : []);
-      _.each(aggregationArray, function(aggregation) {
-        request.agg(me._buildAggregationFilter(aggregation));
-      });
+      if(this.aggregations) {
+        (this.aggregations.constructor === Array ? this.aggregations : [this.aggregations]).forEach(function(aggregation) {
+          request.agg(aggregation);
+        });
+      }
 
       if(this.highlight) {
         request.highlight(this.highlight);
@@ -560,49 +525,6 @@ elasticsearch REST API.
       } else {
         return 0;
       }
-    },
-
-    /**
-     * Creates and returns the elasticjs aggregation filter object using the given array of elasticjs aggregation objects.
-     *
-     * @param {Array} aggregations
-     * @return {Object}
-     * @private
-     */
-    _buildAggregationFilter: function(aggregations) {
-      var aggName = Object.keys(aggregations.toJSON())[0];
-
-      // Include all filters except any matching the name of this aggregation.
-      var filterArray = (this.filters ? ((this.filters.constructor === Array) ? this.filters : [this.filters]) : []);
-      var filter = this._buildFilter(filterArray, aggName);
-      var filteredAgg = ejs.FilterAggregation(aggName).filter(filter).agg(aggregations);
-      return filteredAgg;
-    },
-
-    /**
-     * Creates and returns the elasticjs filter object using the given array of elasticjs filter objects and optionally the name of a filter object to exclude.
-     *
-     * @param {Array} filters
-     * @param {String} excludeName
-     * @return {Object}
-     * @private
-     */
-    _buildFilter: function(filters, excludeName) {
-      var includedFilters = excludeName ? [] : filters;
-      if(excludeName) {
-        filters.forEach(function(filter) {
-          if(!filter.name() || filter.name() !== excludeName) {
-            includedFilters.push(filter);
-          }
-        });
-      }
-
-      var boolFilter = ejs.BoolFilter();
-      includedFilters.forEach(function(filter) {
-        boolFilter.must(filter);
-      });
-
-      return boolFilter;
     }
   });
 </script>

@@ -1,7 +1,7 @@
 {
   "name": "elastic-client-search",
   "description": "A Polymer Element which provides a web component interface to the elasticsearch client search API, and coordinates building and issuing queries using the elastic.js library.",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "authors": [
     "Next Century"
   ],
