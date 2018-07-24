@@ -1,10 +1,9 @@
 {
   "name": "elastic-client-search",
-  "description": "A Polymer Element which provides a web component interface to the elasticsearch client search API, and coordinates building and issuing queries using the elastic.js library.",
+  "description":
+    "A Polymer Element which provides a web component interface to the elasticsearch client search API, and coordinates building and issuing queries using the elastic.js library.",
   "version": "2.4.0",
-  "authors": [
-    "Next Century"
-  ],
+  "authors": ["Next Century"],
   "license": "Apache-2.0",
   "keywords": [
     "web-component",
@@ -15,14 +14,12 @@
   ],
   "main": "elastic-client-search.html",
   "homepage": "https://github.com/usc-isi-digelements/elastic-client-search/",
-  "ignore": [
-    "/.*",
-    "/test/"
-  ],
+  "ignore": ["/.*", "/test/"],
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
-    "elastic-client": "usc-isi-digelements/elastic-client#2.1.0",
-    "elasticsearchjs-import": "usc-isi-digelements/elasticsearchjs-import#2.0.0",
+    "elastic-client": "usc-isi-digelements/elastic-client#^2.1.0",
+    "elasticsearchjs-import":
+      "usc-isi-digelements/elasticsearchjs-import#^2.0.0",
     "elasticjs-import": "usc-isi-digelements/elasticjs-import#~1.0.1",
     "lodash-import": "usc-isi-digelements/lodash-import#~1.0.1"
   },
